@@ -1,5 +1,5 @@
-#+Title: Steckemacs
-#+Author: steckerhalter
+#+Title: Steckemacs - ayoshi
+#+Author: ayoshi
 
 * Options                                                  :noexport:ARCHIVE:
 #+OPTIONS: todo:t html-style:nil
@@ -10,13 +10,16 @@
 #+BEGIN_SRC emacs-lisp :tangle no :results silent
 (org-babel-tangle-file "steckemacs.org" "steckemacs.el" "emacs-lisp")
 #+END_SRC
-
+  
 
 * Usage
 
-*steckemacs* is an Emacs configuration that integrates around 60 modes (packages). Stock Emacs is not very useful and lacks many convenient commands. Over the years I've discovered many good extensions and added them to this setup. The goal is to keep everything in one file =steckemacs.org= (plus =.emacs= for the initialization) and not as many others to split it over lots of files and directories. Packages are retrieved from the Emacs package repositories on the internet on the first startup.
+*steckemacs-ayoshi* is an Emacs configuration based on an original config by Steckerhalter http://steckerhalter.co.vu/. The main diferrence from an original is that this configuration tries to replace VIM, and uses evil mode heavily. The goal is to make Emacs a much better VIM.
 
-The source code is hosted on Github: [[https://github.com/steckerhalter/steckemacs]]
+The second goal is to keep everything in one file =steckemacs.org= (plus =.emacs= for the initialization) and not as many others to split it over lots of files and directories. Packages are retrieved from the Emacs package repositories on the internet on the first startup. 
+
+The source code is hosted on Github: [[https://github.com/ayoshi/steckemacs]]
+The original steckemacs source code is hosted  here: [[https://github.com/steckerhalter/steckemacs]]
 
 *To use this setup please use Emacs 24.3.50 or later (currently that's the development snapshot). Older versions don't work because I use some of the new features of what is to become Emacs 24.4*
 
@@ -26,7 +29,7 @@ Change to a directory of your choice and clone *steckemacs*:
 
 #+BEGIN_SRC shell-script
 cd <my directory>
-git clone https://github.com/steckerhalter/steckemacs.git
+git clone https://github.com/ayoshi/steckemacs.git
 #+END_SRC
 
 And symlink =.emacs= into your home directory:
@@ -178,6 +181,18 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         (:name php-boris-minor-mode
                :type git
                :url "https://github.com/steckerhalter/php-boris-minor-mode")
+        ;; TODO: fix the package
+        ;;(:name evil-extra-operator
+        ;;       :type github
+        ;;       :pkgname "Dewdrops/evil-extra-operator")
+        ;;(:name evil-exchange
+        ;;       :type github
+        ;;       :features evil-exchange
+        ;;       :pkgname "Dewdrops/evil-exchange")
+        ;;(:name evil-plugins
+        ;;       :type github
+        ;;       :features evil-plugins
+        ;;       :pkgname "tarao/evil-plugins")
         (:name php-documentor
                :type http
                :url "https://raw.github.com/wenbinye/dot-emacs/master/site-lisp/contrib/php-documentor.el")
@@ -198,10 +213,10 @@ These are simple El-Get recipes that will either fetch single Elisp files or clo
 The sync function expects the package names which are extracted from =el-get-sources=. El-Get does the magic and gets the packages specified in =el-get-sources=.
 
 ** Packages
-
+   
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
+   (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
+   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 #+END_SRC
 
 This adds two remote package repositories. The repo from the FSF is already included in Emacs 24 (see http://elpa.gnu.org/).
@@ -212,9 +227,15 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
 
 #+BEGIN_SRC emacs-lisp
 (setq my-packages
-
       '(ack-and-a-half
+        ace-jump-mode
         ag
+        evil
+        surround
+        evil-indent-textobject
+        evil-leader
+        evil-nerd-commenter
+        evil-matchit
         apache-mode
         auto-dim-other-buffers
         auto-save-buffers-enhanced
@@ -225,6 +246,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         clojure-mode
         company
         csv-mode
+        dash
         deft
         dired+
         discover
@@ -239,6 +261,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         geben
         gist
         grandshell-theme
+        sublime-themes
         grizzl
         haskell-mode
         hide-comnt
@@ -278,12 +301,17 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         skewer-mode
         smart-mode-line
         smartparens
+        smex
         visual-regexp
         vlf
         volatile-highlights
         web-mode
         yaml-mode
-        yari))
+        yari
+        solarized-theme
+        color-theme-sanityinc-solarized
+        color-theme-sanityinc-tomorrow
+        ))
 #+END_SRC
 
 Quite a big list of packages. When Emacs starts up the first time it takes quite a while to install all of them.
@@ -345,7 +373,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 =C-t= is translated to =C-p= (move up), this helps me with navigating using the [[http://en.wikipedia.org/wiki/Dvorak_Simplified_Keyboard][Dvorak keyboard layout]].
 =my-keys-minor-mode-map= is used to set =C-return= in this case in a way so that other minor modes cannot override it.
 
-**** Key definition table                                          :noexport:
+**** Emacs Key definition table                                    :noexport:
 #+TBLNAME: keys
 | Combo             | Category  | Desciption                                                | Command                                                     |
 |-------------------+-----------+-----------------------------------------------------------+-------------------------------------------------------------|
@@ -355,7 +383,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-x a s           | General   | Toggle auto saving of buffers                             | 'auto-save-buffers-enhanced-toggle-activity                 |
 | C-c d             | General   | Change dictionary                                         | 'ispell-change-dictionary                                   |
 | C-c C-f           | General   | Toggle flyspell mode (spellchecking)                      | 'flyspell-mode                                              |
-| M-x               | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
+| M-x               | General   | Smex (execute command)                                    | 'smex                                                       |
 | C-h C-h           | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
 | C-h h             | General   | Helm navigate project files                               | 'helm-projectile                                            |
 | <C-S-iso-lefttab> | General   | Helm for files                                            | 'helm-for-files                                             |
@@ -366,8 +394,8 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-h C-p           | General   | Open file                                                 | 'find-file                                                  |
 | cg                | General   | Customize group                                           | 'customize-group                                            |
 | C-c m             | Interface | Toggle the menu bar                                       | 'menu-bar-mode                                              |
-| C--               | Interface | Decrease the font size                                    | 'text-scale-decrease                                        |
-| C-=               | Interface | Increase the font size                                    | 'text-scale-increase                                        |
+| s--               | Interface | Decrease the font size                                    | 'text-scale-decrease                                        |
+| s-=               | Interface | Increase the font size                                    | 'text-scale-increase                                        |
 | ln                | Interface | Show/hide the line numbers                                | 'linum-mode                                                 |
 | C-x C-u           | Internet  | Prompt for URL and insert contents at point               | 'my-url-insert-file-contents                                |
 | C-c C-w           | Internet  | Browse URL under cursor                                   | 'browse-url-at-point                                        |
@@ -389,6 +417,8 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-c w             | Editing   | Cleanup whitespaces                                       | 'whitespace-cleanup                                         |
 | C-h C-v           | Editing   | Toggle visual line mode                                   | 'visual-line-mode                                           |
 | C-h TAB           | Editing   | Indent the whole buffer                                   | 'my-indent-whole-buffer                                     |
+| S-SPC             | Editing   | Expand Region                                             | 'expand-region                                              |
+| S-s-SPC           | Editing   | Expand Region                                             | 'expand-region                                              |
 | C-?               | Source    | Go to definition of function or variable at point         | 'my-find-function-or-variable-at-point                      |
 | C-h C-f           | Source    | Go to the definition of the function under cursor         | 'find-function-at-point                                     |
 | M-5               | Source    | Helm select etags                                         | 'helm-etags-select                                          |
@@ -472,9 +502,35 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-h C-w           | Org       | Cut the current subtree into the clipboard                | 'org-cut-subtree                                            |
 | C-c v             | PHP       | var dump die template                                     | 'var_dump-die                                               |
 | C-c V             | PHP       | var dump template                                         | 'var_dump                                                   |
+| M-;               | Evil      | Comment/Uncomment line                                    | 'evilnc-comment-or-uncomment-lines                          |
+| C-c l             | Evil      | Comment/Uncomment to the line                             | 'evilnc-comment-or-uncomment-to-the-line                    |
+| C-c c             | Evil      | Copy and Comment lines                                    | 'evilnc-copy-and-comment-lines                              |
+| C-c p             | Evil      | Comment/Uncomment paragraphs                              | 'evilnc-comment-or-uncomment-paragraphs                     |
+| ESC               | Global    | Replace Ctl-g                                             | 'keyboard-escape-quit                                       |
+
+**** Evil Key definition table                                     :noexport:
+#+TBLNAME: evil_keys
+| Combo      | Category            | Desciption                           | Command                                 |
+| ;          | Evil Prefixes       | <Leader> key for further keybindings |                                         |
+| <Leader>jc | Evil Ace            | Jump Char                            | 'evil-ace-jump-char-mode                 |
+| <Leader>jw | Evil Ace            | Jump Word                            | 'evil-ace-jump-word-mode                 |
+| <Leader>jl | Evil Ace            | Jump Line                            | 'evil-ace-jump-line-mode                 |
+| <Leader>ci | Evil Nerd Commenter | Comment/Uncomment to the line        | 'evilnc-comment-or-uncomment-to-the-line |
+| <Leader>cl | Evil Nerd Commenter | Copy and Comment lines               | 'evilnc-copy-and-comment-lines           |
+| <Leader>cp | Evil Nerd Commenter | Comment/Uncomment paragraphs         | 'evilnc-comment-or-uncomment-paragraphs  |
+| <Leader>cr | Evil Nerd Commenter | Comment/Uncomment region             | 'evilnc-comment-or-uncomment-region      |
+
+Keybinding which are provided by corresponding plugins can be found in their documentation
+
+[[https://github.com/Dewdrops/evil-extra-operator]]
+[[https://github.com/tarao/evil-plugins]] 
+[[https://github.com/redguardtoo/evil-nerd-commenter]]
+[[https://github.com/redguardtoo/evil-matchit]]
+[[https://github.com/Dewdrops/evil-exchange]]
+[[https://github.com/timcharper/evil-surround]]
+[[https://github.com/Dewdrops/evil-extra-operator]]
 
 ** Settings
-
 *** User Settings
 
 #+BEGIN_SRC emacs-lisp
@@ -575,24 +631,44 @@ Also Emacs should be able to kill processes without asking ([[(process-query)][l
 
 ** Theme, Faces, Frame
 
-#+BEGIN_SRC emacs-lisp
-(load-theme 'grandshell t)
-#+END_SRC
+Here goes everything theme-related.
 
-Loading my very own [[https://github.com/steckerhalter/grandshell-theme][Grand Shell Theme]] here. It can be installed via [[http://melpa.milkbox.net/#grandshell-theme][MELPA]]. It looks like this:
+*** Pre-theme
 
-#+CAPTION: Grand Shell Theme
-#+NAME: grand-shell-theme
-[[https://raw.github.com/steckerhalter/grandshell-theme/master/grandshell-theme.png]]
+First things first - resetting theme to default on any load-theme will fix all small problems during theme change
 
 #+BEGIN_SRC emacs-lisp
-(set-face-attribute 'default nil :background "black" :foreground "#babdb6")
+(defadvice load-theme
+  (before theme-dont-propagate activate)
+  (mapcar #'disable-theme custom-enabled-themes))
 #+END_SRC
 
-Use a black background and gray text. To set the default font you can use something like this:
+Treat all themes as safe - don't see a real reason not too.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(set-face-attribute 'default nil :family "Bitstream Vera Sans Mono" :height 89)
+#+BEGIN_SRC emacs-lisp
+(setq custom-safe-themes t)
+#+END_SRC
+
+*** Set theme, face, frame
+I prefer hickey theme from sublime-themes packages
+
+#+CAPTION: Hickey 
+#+NAME: Hickey theme
+https://raw.github.com/owainlewis/emacs-color-themes/master/previews/hickey.png
+
+#+BEGIN_SRC emacs-lisp
+(load-theme 'hickey t)
+#+END_SRC
+
+Select the first available font in order of preference
+
+#+BEGIN_SRC emacs-lisp
+(require 'dash)
+  (defun font-candidate (&rest fonts)
+    "Return the first available font."
+    (--first (find-font (font-spec :name it)) fonts))
+
+(set-face-attribute 'default nil :font (font-candidate "PragmataPro-16:weight=normal" "Menlo-16:weight=normal" "DejaVu Sans Mono-10:weight=normal"))
 #+END_SRC
 
 Put that line into =~/.user.el= which is loaded [[*User%20Settings][in this init file too.]]
@@ -619,6 +695,17 @@ For the frame title either show a file or a buffer name (if the buffer isn't vis
     ("#FFFFFF" . "#FFFFFF")]))
 #+END_SRC
 
+*** Post-theme tweaks
+Some themes don't cover faces for the plugins I use. Here I tweak them
+
+Git gutter backgroung is not set correctly by many themes.
+This will reset it to the default background
+
+#+BEGIN_SRC emacs-lisp
+(when (require 'git-gutter nil 'noerror)
+  (set-face-background 'git-gutter:unchanged nil))
+#+END_SRC
+
 For some reason this didn't work with =setq= so I had to use =custom-set-variables=. It changes ansi colors for comint mode, e.g. shell-mode
 
 ** Custom Functions
@@ -631,7 +718,7 @@ For some reason this didn't work with =setq= so I had to use =custom-set-variabl
   (url-insert-file-contents url)
   )
 #+END_SRC
-
+  
 *** my-find-function-or-variable-at-point
 
 #+BEGIN_SRC emacs-lisp
@@ -1972,48 +2059,199 @@ Github: https://github.com/fxbois/web-mode
 #+END_SRC
 
 Enable web-mode for html buffers. Disable font-locking in web-mode because it's conflicting with other modes that do font-locking.
-*** w3m
 
-An Emacs client for the command line web-browser =w3m=
+** end
+
+** Evil - make an Emacs into a better VIM
+
+*** Basics:
 
 #+BEGIN_SRC emacs-lisp
-(when (require 'w3m nil t)
-  (setq
-   w3m-use-favicon nil
-   w3m-default-display-inline-images t
-   w3m-search-word-at-point nil
-   w3m-use-cookies t
-   w3m-home-page "http://en.wikipedia.org/"
-   w3m-cookie-accept-bad-cookies t
-   w3m-session-crash-recovery nil)
-  (add-hook 'w3m-mode-hook
-            (function (lambda ()
-                        (set-face-foreground 'w3m-anchor-face "LightSalmon")
-                        (set-face-foreground 'w3m-arrived-anchor-face "LightGoldenrod")
-                        ;;(set-face-background 'w3m-image-anchor "black")
-                        (load "w3m-lnum")
-                        (defun w3m-go-to-linknum ()
-                          "Turn on link numbers and ask for one to go to."
-                          (interactive)
-                          (let ((active w3m-lnum-mode))
-                            (when (not active) (w3m-lnum-mode))
-                            (unwind-protect
-                                (w3m-move-numbered-anchor (read-number "Anchor number: "))
-                              (when (not active) (w3m-lnum-mode))))
-                          (w3m-view-this-url)
-                          )
-                        (define-key w3m-mode-map "f" 'w3m-go-to-linknum)
-                        (define-key w3m-mode-map "L" 'w3m-lnum-mode)
-                        (define-key w3m-mode-map "o" 'w3m-previous-anchor)
-                        (define-key w3m-mode-map "i" 'w3m-next-anchor)
-                        (define-key w3m-mode-map "w" 'w3m-search-new-session)
-                        (define-key w3m-mode-map "p" 'w3m-previous-buffer)
-                        (define-key w3m-mode-map "n" 'w3m-next-buffer)
-                        (define-key w3m-mode-map "z" 'w3m-delete-buffer)
-                        (define-key w3m-mode-map "O" 'w3m-goto-new-session-url)
-                        )))
-  )
+(require 'evil)
+(evil-mode 1)
+
+;; Bring back normal cursor
+;;(setq evil-default-cursor nil)
+
+(setq evil-default-state 'normal)
+
+(setq evil-mode-line-format nil)
+
+;Disable evil in special buffers
+(loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
+                              (pylookup-mode . emacs)
+                              (comint-mode . emacs)
+                              (ebib-entry-mode . emacs)
+                              (ebib-index-mode . emacs)
+                              (ebib-log-mode . emacs)
+                              (gtags-select-mode . emacs)
+                              (shell-mode . emacs)
+                              (term-mode . emacs)
+                              (bc-menu-mode . emacs)
+                              (magit-branch-manager-mode . emacs)
+                              (semantic-symref-results-mode . emacs)
+                              (rdictcc-buffer-mode . emacs))
+      do (evil-set-initial-state mode state))
+
+;;Escape should quit whatever it can
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
 #+END_SRC
+
+*** Evil Leader
+
+Enable <Leader>. Set the <Leade> key to ; ( on home row )
+
+#+BEGIN_SRC emacs-lisp
+(global-evil-leader-mode)
+(setq evil-leader/leader ";" evil-leader/in-all-states t)
+#+END_SRC
+
+*** Evil Surround
+#+BEGIN_SRC emacs-lisp
+(global-surround-mode 1)
+#+END_SRC
+
+*** Evil Matchit
+#+BEGIN_SRC emacs-lisp
+(global-evil-matchit-mode 1)
+#+END_SRC
+
+*** Evil Nerd Commenter
+
+#+BEGIN_SRC emacs-lisp
+(evil-leader/set-key "ci" 'evilnc-comment-or-uncomment-lines)
+(evil-leader/set-key "cl" 'evilnc-comment-or-uncomment-to-the-line)
+(evil-leader/set-key "cc" 'evilnc-copy-and-comment-lines)
+(evil-leader/set-key "cp" 'evilnc-comment-or-uncomment-paragraphs)
+(evil-leader/set-key "cr" 'comment-or-uncomment-region)
+
+#+END_SRC
+
+*** Evil Exchange
+#+BEGIN_SRC emacs-lisp
+;;(evil-exchange-install)
+#+END_SRC
+
+*** Evil Extra Operator
+#+BEGIN_SRC emacs-lisp
+;;(global-evil-extra-operator-mode 1)
+#+END_SRC
+
+*** Evil Plugins
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+*** Evil Ace Jump
+AceJump is a nice addition to evil's standard motions.
+
+The following definitions are necessary to define evil motions for ace-jump-mode (version 2).
+
+ace-jump is actually a series of commands which makes handling by evil
+difficult (and with some other things as well), using this macro we let it
+appear as one.
+
+#+BEGIN_SRC emacs-lisp
+(when (require 'ace-jump-mode nil 'noerror)
+(defmacro evil-enclose-ace-jump (&rest body)
+  `(let ((old-mark (mark)))
+     (remove-hook 'pre-command-hook #'evil-visual-pre-command t)
+     (remove-hook 'post-command-hook #'evil-visual-post-command t)
+     (unwind-protect
+         (progn
+           ,@body
+           (recursive-edit))
+       (if (evil-visual-state-p)
+           (progn
+             (add-hook 'pre-command-hook #'evil-visual-pre-command nil t)
+             (add-hook 'post-command-hook #'evil-visual-post-command nil t)
+             (set-mark old-mark))
+         (push-mark old-mark)))))
+
+(evil-define-motion evil-ace-jump-char-mode (count)
+  :type exclusive
+  (evil-enclose-ace-jump
+   (ace-jump-mode 5)))
+
+(evil-define-motion evil-ace-jump-line-mode (count)
+  :type line
+  (evil-enclose-ace-jump
+   (ace-jump-mode 9)))
+
+(evil-define-motion evil-ace-jump-word-mode (count)
+  :type exclusive
+  (evil-enclose-ace-jump
+   (ace-jump-mode 1)))
+
+(evil-define-motion evil-ace-jump-char-to-mode (count)
+  :type exclusive
+  (evil-enclose-ace-jump
+   (ace-jump-mode 5)
+   (forward-char -1))))
+
+;; Set keybindings for ace-mode
+(evil-leader/set-key
+  "jc" 'evil-ace-jump-char-mode
+  "jw" 'evil-ace-jump-word-mode
+  "jl" 'evil-ace-jump-line-mode)
+#+END_SRC
+
+*** Custom key bindings
+
+Those are cusom bindings that I use.
+
+TODO move evil bindings to separate table
+
+#+BEGIN_SRC emacs-lisp
+;;Use <Leader>, to bring up emacs command
+(evil-leader/set-key "," 'smex)
+
+;; Emulate some behavior of Lusty*
+
+;; Leader lb - ido buffers lf - ido files
+(evil-leader/set-key "lb" 'ido-switch-buffer)
+(evil-leader/set-key "lB" 'ibuffer)
+(evil-leader/set-key "lf" 'ido-find-file)
+(evil-leader/set-key "lr" 'ido-recentf-open)
+
+;; simulate vim's "nnoremap <space> 10jzz"
+(define-key evil-normal-state-map " " (lambda ()
+                                        (interactive)
+                                        (next-line 10)
+                                        (evil-scroll-line-down 10)))
+
+;; Use = to indent region - very useful
+(define-key evil-normal-state-map "=" 'indent-region)
+
+;; simulate vim's "nnoremap <backspace> 10kzz"
+(define-key evil-normal-state-map [backspace] (lambda ()
+                                                (interactive)
+                                                (previous-line 10)
+                                                (evil-scroll-line-up 10)))
+
+;; Working with splits
+(evil-leader/set-key "|" 'split-window-horizontally )
+(evil-leader/set-key "\\" 'split-window-vertically)
+
+;; Use Shift-arrows to move around splits
+(windmove-default-keybindings)
+
+;; Magit status screen
+(evil-leader/set-key "gs" 'magit-status)
+
+;;Undo tree
+(evil-leader/set-key "u" 'undo-tree-visualize)
+
+;; Super escape using chords
+(key-chord-define-global "jk"  'evil-normal-state) ; super ESC
+(key-chord-define-global "JK"  'evil-emacs-state)
+
+;; ;; Use DASH for documentaton
+;; (define-key evil-normal-state-map (kbd "?") 'dash-at-point)
+#+END_SRC
+
+
 
 ** end
 
@@ -2028,3 +2266,4 @@ An Emacs client for the command line web-browser =w3m=
 
 #+HTML: <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 #+HTML: <script type="text/javascript" src="/stuff/js/bootstrap.min.js"></script>
+    

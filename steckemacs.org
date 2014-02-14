@@ -1,7 +1,7 @@
 #+Title: Steckemacs - ayoshi
 #+Author: ayoshi
 
-* Options                                                  :noexport:ARCHIVE:
+* DONE Options                                             :noexport:ARCHIVE:
 #+OPTIONS: todo:t html-style:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/css/style.css" />
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/css/steckemacs.css" />
@@ -81,6 +81,7 @@ This table is generated with an Elisp block =keys-doc= from an Org table which i
 
 * Code
 
+ 
 ** Always maximize Emacs
 
 #+BEGIN_SRC emacs-lisp
@@ -147,8 +148,7 @@ Dimitri (on the image above, [[fig:dimitri]]) is the clever guy that brougth us 
          "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
       (goto-char (point-max))
       (eval-print-last-sexp))
-    (error "El-Get is not installed and we are unable to download it without an internet connection: cannot continue")
-    ))
+    (error "El-Get is not installed and we are unable to download it without an internet connection: cannot continue")))
 #+END_SRC
 
 This sets up the load path and fetches and evaluates the stable El-Get branch if not already loaded (as described [[https://github.com/dimitri/el-get#basic-setup][on Github]]). In line [[(wiki)]] we make sure El-Get doesn't load all the Wiki recipes as we don't use them.
@@ -212,7 +212,7 @@ These are simple El-Get recipes that will either fetch single Elisp files or clo
 
 The sync function expects the package names which are extracted from =el-get-sources=. El-Get does the magic and gets the packages specified in =el-get-sources=.
 
-** Packages
+** COMMENT Packages
    
 #+BEGIN_SRC emacs-lisp
    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
@@ -236,6 +236,8 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         evil-leader
         evil-nerd-commenter
         evil-matchit
+        evil-tabs
+        exec-path-from-shell
         apache-mode
         auto-dim-other-buffers
         auto-save-buffers-enhanced
@@ -245,8 +247,10 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         creole-mode
         clojure-mode
         company
+        company-jedi
         csv-mode
         dash
+        dash-at-point
         deft
         dired+
         discover
@@ -279,6 +283,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         js2-mode
         json-mode
         key-chord
+        leuven
         magit
         markdown-mode+
         melpa-upstream-visit
@@ -293,6 +298,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         php-eldoc
         php-mode
         popup
+        projectile
         pos-tip
         rainbow-mode
         robe
@@ -325,7 +331,6 @@ Quite a big list of packages. When Emacs starts up the first time it takes quite
 #+END_SRC
 
 This part first checks if there is an internet connection. If true it refreshes the package archive cache and goes on to install all the packages that are not yet installed.
-
 ** Key Bindings
 
 #+BEGIN_SRC emacs-lisp
@@ -383,7 +388,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-x a s           | General   | Toggle auto saving of buffers                             | 'auto-save-buffers-enhanced-toggle-activity                 |
 | C-c d             | General   | Change dictionary                                         | 'ispell-change-dictionary                                   |
 | C-c C-f           | General   | Toggle flyspell mode (spellchecking)                      | 'flyspell-mode                                              |
-| M-x               | General   | Smex (execute command)                                    | 'smex                                                       |
+| <M-x>             | General   | Smex (execute command)                                    | 'smex                                                       |
 | C-h C-h           | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
 | C-h h             | General   | Helm navigate project files                               | 'helm-projectile                                            |
 | <C-S-iso-lefttab> | General   | Helm for files                                            | 'helm-for-files                                             |
@@ -539,6 +544,38 @@ Keybinding which are provided by corresponding plugins can be found in their doc
 
 Load user settings if the file is available. Put all your personal modifications or sensitive information into this file.
 
+*** OSX specific setup 
+
+#+BEGIN_SRC emacs-lisp
+(setq default-input-method "MacOSX")
+
+;; Make cut and paste work with the OS X clipboard
+
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
+
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+ (when (not window-system)
+   (setq interprogram-cut-function 'paste-to-osx)
+   (setq interprogram-paste-function 'copy-from-osx))
+
+;; Work around a bug on OS X where system-name is a fully qualified
+;; domain name
+(setq system-name (car (split-string system-name "\\.")))
+
+;; Ensure the exec-path honours the shell PATH
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))'
+
+;; Ignore .DS_Store files with ido mode
+(add-to-list 'ido-ignore-files "\\.DS_Store")
+#+END_SRC
+   
 *** Encoding
 
 #+BEGIN_SRC emacs-lisp
@@ -606,7 +643,7 @@ These have to be set as defaults.
 #+END_SRC
 
 *** Prompt Behavior
-
+    
 #+BEGIN_SRC emacs-lisp -n -r
 (defalias 'yes-or-no-p 'y-or-n-p) (ref:y-or-n)
 
@@ -793,7 +830,7 @@ Call a second time to restore the original window configuration."
 #+END_SRC
 
 *** my-open-terminal
-
+TODO Fix to work with iTerm on MAC
 #+BEGIN_SRC emacs-lisp
 (defvar my-terminal '("terminator" . "--working-directory=")
   "Terminal executable and after the dot the working directory option for the terminal"
@@ -852,7 +889,7 @@ Usage example:
 
 Make =isearch-forward= put the cursor at the start of the search, not the end, so that isearch can be used for navigation. See also http://www.emacswiki.org/emacs/IsearchOtherEnd.
 
-*** my-mark-whole-buffer
+*** my-indent-whole-buffer
 
 #+BEGIN_SRC emacs-lisp
 (defun my-indent-whole-buffer ()
@@ -915,6 +952,16 @@ line instead."
     (if (equal buffer-to-kill "*scratch*")
         (bury-buffer)
       ad-do-it)))
+
+;; Make terminal support Unicode - should have worked, but doesnt' yet 
+(defadvice ansi-term (after advise-ansi-term-coding-system)
+    (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+(ad-activate 'ansi-term)
+
+(add-hook 'term-exec-hook
+          (function
+           (lambda ()
+             (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))))
 #+END_SRC
 
 ** Modes
@@ -940,13 +987,13 @@ line instead."
 
 *** auto-dim-other-buffers
 #+BEGIN_QUOTE
-Visually makes non-current buffers less prominent
+Visually makes non-current buffers less prominent. Currently disabled, but original author liked it.
 #+END_QUOTE
 
 Github: https://github.com/mina86/auto-dim-other-buffers.el
 
 #+BEGIN_SRC emacs-lisp
-(auto-dim-other-buffers-mode 1)
+;;(auto-dim-other-buffers-mode -1)
 #+END_SRC
 
 *** auto-save-buffers-enhanced
@@ -1012,7 +1059,7 @@ http://company-mode.github.io/images/company-semantic.png
 (setq company-minimum-prefix-length 2)
 (setq company-echo-delay 0)
 (setq company-auto-complete nil)
-(global-company-mode 1)
+(global-company-mode 0)
 (add-to-list 'company-backends 'company-dabbrev t)
 (add-to-list 'company-backends 'company-ispell t)
 (add-to-list 'company-backends 'company-files t)
@@ -1023,6 +1070,12 @@ http://company-mode.github.io/images/company-semantic.png
 #+END_SRC
 
 I started using =company= because =auto-complete= seemed to be buggy and slow. Some of the company features are pretty cool, for example the ability to search within completions with =C-s= or to show the symbol definition with =C-w=. =<f1>= shows the full documentation of a symbol. I miss the popup from auto-complete a bit but I guess that's not so important in the end.
+
+**** Company for python - company-jedi
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'python-mode-hook 'company-jedi-start)
+#+END_SRC
 
 *** conf-mode
 
@@ -1097,11 +1150,44 @@ Elpy makes setting up a great Python IDE a breeze. It's written by [[http://www.
 Github: https://github.com/jorgenschaefer/elpy
 
 #+BEGIN_SRC emacs-lisp
+
+;; ;; Support for pyenv
+;; (defvar pyenv-path "~/.pyenv"
+;;   "pyenv root directory.")
+
+;; (when (file-exists-p pyenv-path)
+;;   (let ((bin-path (concat pyenv-path "/bin"))
+;;         (shims-path (concat pyenv-path "/shims")))
+;;     (setenv "PATH"
+;;             (concat bin-path ":" shims-path ":"
+;;                     (getenv "PATH")))
+;;     (setq python-check-command (concat shims-path "/flake8"))
+;;     (setq elpy-rpc-python-command (concat shims-path "/python"))))
+
 (elpy-enable)
 (delq 'flymake-mode elpy-default-minor-modes)
+
+(elpy-use-ipython)
+
 #+END_SRC
 
 I'm using =flycheck= so please don't use =flymake= (which is old and bugly). Also RET should trigger completion for me and not a newline.
+
+*** ack-and-a-half + ag
+    
+I use both sometimes, they are similar though ag is written in C and is considerably faster
+
+#+BEGIN_SRC emacs-lisp
+
+;; Ack and a half
+(defalias 'ack 'ack-and-a-half)
+(defalias 'ack-same 'ack-and-a-half-same)
+(defalias 'ack-find-file 'ack-and-a-half-find-file)
+(defalias 'ack-find-file-same 'ack-and-a-half-find-file-same)
+
+;; ag 
+(setq ag-highlight-search t)
+#+END_SRC
 
 *** eval-sexp-fu
 
@@ -1203,7 +1289,7 @@ inspired by tools like autojump
 
 The command-line tool is available an Github: https://github.com/clvv/fasd
 
-The =global-fasd-mode= was written by myself. It's purpose is to make the quick access DB from =fasd= available in Emacs and also to add visited files and directories from Emacs to the =fasd= DB.
+The =global-fasd-mode= was written by Steckerhalter. It's purpose is to make the quick access DB from =fasd= available in Emacs and also to add visited files and directories from Emacs to the =fasd= DB.
 
 Github: https://github.com/steckerhalter/emacs-fasd
 
@@ -1356,14 +1442,42 @@ Use =C-j= if you want to create a file with what you have entered (and not the m
       ido-everywhere t
       ido-default-buffer-method 'selected-window
       ido-max-prospects 32
+      ido-ignore-extensions t
       ido-use-filename-at-point 'guess
       )
 (ido-mode 1)
 (flx-ido-mode 1)
 (setq ido-use-faces nil)
+
+;; Ignore .DS_Store files with ido mode
+(add-to-list 'ido-ignore-files "\\.DS_Store")
 #+END_SRC
 
-I added flx-ido quite recently which does indeed improve the flex matching. A shout out to Le Wang who coded it.
+I prefer the list of files to be sorted by mtime (like 'ls -ltr'), instead of alphabetically. Let's make it happen.
+
+#+BEGIN_SRC emacs-lisp
+;; sort ido filelist by mtime instead of alphabetically
+(add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
+(add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
+(defun ido-sort-mtime ()
+  (setq ido-temp-list
+        (sort ido-temp-list
+              (lambda (a b)
+                (let ((a-tramp-file-p (string-match-p ":\\'" a))
+                      (b-tramp-file-p (string-match-p ":\\'" b)))
+                  (cond
+                   ((and a-tramp-file-p b-tramp-file-p)
+                    (string< a b))
+                   (a-tramp-file-p nil)
+                   (b-tramp-file-p t)
+                   (t (time-less-p
+                       (sixth (file-attributes (concat ido-current-directory b)))
+                       (sixth (file-attributes (concat ido-current-directory a))))))))))
+  (ido-to-end  ;; move . files to end (again)
+   (delq nil (mapcar
+              (lambda (x) (and (char-equal (string-to-char x) ?.) x))
+              ido-temp-list))))
+#+END_SRC
 
 Github: https://github.com/lewang/flx
 
@@ -1456,11 +1570,14 @@ I have bound =magit-status= to =C-c g= and =magit-log= to =C-c l=.
 See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more information.
 
 #+BEGIN_SRC emacs-lisp
-(when (fboundp 'file-notify-add-watch)
-  (add-hook 'magit-status-mode-hook 'magit-filenotify-mode))
+;;(when (fboundp 'file-notify-add-watch)
+ ;; (add-hook 'magit-status-mode-hook 'magit-filenotify-mode))
 (setq magit-save-some-buffers nil) ;don't ask to save buffers
 (setq magit-set-upstream-on-push t) ;ask to set upstream
 (setq magit-diff-refine-hunk t) ;show word-based diff for current hunk
+
+;; q should fully quit session 
+(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
 #+END_SRC
 
 Committing should act like =git commit -a= by default.
@@ -1468,7 +1585,7 @@ Committing should act like =git commit -a= by default.
 When Emacs has been compiled with inotiy support...
 
 #+BEGIN_SRC shell-script
-./configure --with-file-notification=inotify
+#./configure --with-file-notification=inotify
 #+END_SRC
 
 ...the function =file-notify-add-watch= is bound and we add =magit-filenotify-mode= to the hook so that file updates get reflected automatically in magit status.
@@ -1496,49 +1613,6 @@ Allows to move the current line or region up/down
 
 #+BEGIN_SRC emacs-lisp
 (require 'move-text)
-#+END_SRC
-
-*** mu4e
-
-Mail client for Emacs by Dirk-Jan Binnema a.k.a =djcb=
-
-Github: https://github.com/djcb/mu
-
-#+BEGIN_SRC emacs-lisp
-(when (file-exists-p "/usr/local/share/emacs/site-lisp/mu4e")
-  (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
-  (autoload 'mu4e "mu4e" "Mail client based on mu (maildir-utils)." t)
-  (require 'org-mu4e)
-  ;; enable inline images
-  (setq mu4e-view-show-images t)
-  ;; use imagemagick, if available
-  (when (fboundp 'imagemagick-register-types)
-    (imagemagick-register-types))
-  (setq mu4e-html2text-command "html2text -utf8 -width 72")
-  (setq mu4e-update-interval 60)
-  (setq mu4e-auto-retrieve-keys t)
-  (setq mu4e-headers-leave-behavior 'apply)
-  (setq mu4e-headers-visible-lines 20)
-  (setq mu4e-hide-index-messages t)
-
-  (add-hook 'mu4e-headers-mode-hook (lambda () (local-set-key (kbd "X") (lambda () (interactive) (mu4e-mark-execute-all t)))))
-  (add-hook 'mu4e-view-mode-hook (lambda () (local-set-key (kbd "X") (lambda () (interactive) (mu4e-mark-execute-all t)))))
-
-  (defun mu4e-headers-mark-all-unread-read ()
-    (interactive)
-    (mu4e~headers-mark-for-each-if
-     (cons 'read nil)
-     (lambda (msg param)
-       (memq 'unread (mu4e-msg-field msg :flags)))))
-
-  (defun mu4e-flag-all-read ()
-    (interactive)
-    (mu4e-headers-mark-all-unread-read)
-    (mu4e-mark-execute-all t))
-
-  (setq message-kill-buffer-on-exit t)
-
-  )
 #+END_SRC
 
 *** multi-term
@@ -1880,6 +1954,36 @@ This package maintains a menu for visiting files that were operated on recently.
 #+BEGIN_SRC emacs-lisp
 (setq recentf-save-file (expand-file-name "~/.recentf"))
 (recentf-mode 1)
+
+(defun recentf-ido-find-file ()
+  "Find a recent file using Ido."
+  (interactive)
+  (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+    (when file
+      (find-file file))))
+
+(defsubst file-was-visible-p (file)
+  "Return non-nil if FILE's buffer exists and has been displayed."
+  (let ((buf (find-buffer-visiting file)))
+    (if buf
+      (let ((display-count (buffer-local-value 'buffer-display-count buf)))
+        (if (> display-count 0) display-count nil)))))
+
+(defsubst keep-default-and-visible-recentf-p (file)
+  "Return non-nil if recentf would, by default, keep FILE, and
+FILE has been displayed."
+  (if (recentf-keep-default-predicate file)
+      (file-was-visible-p file)))
+
+;; When a buffer is closed, remove the associated file from the recentf
+;; list if (1) recentf would have, by default, removed the file, or
+;; (2) the buffer was never displayed.  This is useful because, for
+;; example, CEDET opens a lot of files in the background to generate
+;; its tags database, etc.
+(setq recentf-keep '(keep-default-and-visible-recentf-p))
+
+
+
 #+END_SRC
 
 *** robe
@@ -1958,7 +2062,7 @@ Instructions and the source code can be found [[https://github.com/skeeto/skewer
 (skewer-setup)
 #+END_SRC
 
-*** smart-mode-line
+*** COMMENT smart-mode-line
 
 #+BEGIN_QUOTE
 Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from small to large monitors by using a prefix feature and smart truncation.
@@ -1969,11 +2073,11 @@ It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortc
 #+BEGIN_SRC emacs-lisp
 (setq sml/vc-mode-show-backend t)
 (sml/setup)
-(sml/apply-theme 'respectful)
-(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
-(set-face-attribute 'sml/folder nil :foreground "#f09fff")
-(set-face-attribute 'sml/filename nil :foreground "#f6df92")
-(set-face-attribute 'sml/vc-edited nil :foreground "#ff5f87")
+;;(sml/apply-theme 'dark)
+;;(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
+;;(set-face-attribute 'sml/folder nil :foreground "#f09fff")
+;;(set-face-attribute 'sml/filename nil :foreground "#f6df92")
+;;(set-face-attribute 'sml/vc-edited nil :foreground "#ff5f87")
 #+END_SRC
 
 Show the encoding and add VC information to the mode-line. Respect the theme-colors and customize some of the =sml= colors.
@@ -2059,8 +2163,6 @@ Github: https://github.com/fxbois/web-mode
 #+END_SRC
 
 Enable web-mode for html buffers. Disable font-locking in web-mode because it's conflicting with other modes that do font-locking.
-
-** end
 
 ** Evil - make an Emacs into a better VIM
 
@@ -2213,7 +2315,7 @@ TODO move evil bindings to separate table
 (evil-leader/set-key "lb" 'ido-switch-buffer)
 (evil-leader/set-key "lB" 'ibuffer)
 (evil-leader/set-key "lf" 'ido-find-file)
-(evil-leader/set-key "lr" 'ido-recentf-open)
+(evil-leader/set-key "lr" 'recentf-ido-find-file)
 
 ;; simulate vim's "nnoremap <space> 10jzz"
 (define-key evil-normal-state-map " " (lambda ()
@@ -2248,10 +2350,8 @@ TODO move evil bindings to separate table
 (key-chord-define-global "JK"  'evil-emacs-state)
 
 ;; ;; Use DASH for documentaton
-;; (define-key evil-normal-state-map (kbd "?") 'dash-at-point)
+(define-key evil-normal-state-map (kbd "?") 'dash-at-point)
 #+END_SRC
-
-
 
 ** end
 
@@ -2266,4 +2366,3 @@ TODO move evil bindings to separate table
 
 #+HTML: <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 #+HTML: <script type="text/javascript" src="/stuff/js/bootstrap.min.js"></script>
-    

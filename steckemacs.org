@@ -185,25 +185,20 @@ We'll set all coding systems to UTF-8
 #+BEGIN_SRC emacs-lisp
 (setq
  inhibit-startup-message t
- auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
  require-final-newline t          ;auto add newline at the end of file
  column-number-mode t             ;show the column number
  default-major-mode 'text-mode    ;use text mode per default
  mouse-yank-at-point t     ;middle click with the mouse yanks at point
  history-length 250        ;default is 30
- locale-coding-system 'utf-8          ;utf-8 is default
- tab-always-indent 'complete          ;try to complete before identing
  confirm-nonexistent-file-or-buffer nil ;don't ask to create a buffer
  vc-follow-symlinks t                   ;follow symlinks automatically
- recentf-max-saved-items 5000           ;same up to 5000 recent files
  eval-expression-print-length nil       ;do not truncate printed expressions
  eval-expression-print-level nil        ;print nested expressions
- send-mail-function 'sendmail-send-it
  kill-ring-max 5000                     ;truncate kill ring after 5000 entries
  mark-ring-max 5000                     ;truncate mark ring after 5000 entries
  mouse-autoselect-window -.1            ;window focus follows the mouse pointer
  mouse-wheel-scroll-amount '(1 ((shift) . 5) ((control))) ;make mouse scrolling smooth
- indicate-buffer-boundaries 'left             ;fringe markers
+ indicate-buffer-boundaries 'right             ;fringe markers
  split-height-threshold 110                   ;more readily split horziontally
  enable-recursive-minibuffers t
  )
@@ -1059,39 +1054,44 @@ This package maintains a menu for visiting files that were operated on recently.
 #+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp
-(require 'recentf)
+(when (require 'recentf nil t)
+  (setq recentf-save-file (expand-file-name (concat conf-tmp-dir "/recentf")))
+  (setq recentf-max-saved-items 200)
+  (setq recentf-auto-save-timer
+        (run-with-idle-timer 30 t 'recentf-save-list))
+  (recentf-mode 1)
 
-(setq recentf-save-file (expand-file-name (concat conf-tmp-dir "/recentf"))
-      recentf-max-saved-items 200)
+  (defun recentf-ido-find-file ()
+    "Find a recent file using Ido."
+    (interactive)
+    (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+      (when file
+        (find-file file))))
 
-(defun recentf-ido-find-file ()
-  "Find a recent file using Ido."
-  (interactive)
-  (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
-    (when file
-      (find-file file))))
+  (defsubst file-was-visible-p (file)
+    "Return non-nil if FILE's buffer exists and has been displayed."
+    (let ((buf (find-buffer-visiting file)))
+      (if buf
+          (let ((display-count (buffer-local-value 'buffer-display-count buf)))
+            (if (> display-count 0) display-count nil)))))
 
-(defsubst file-was-visible-p (file)
-  "Return non-nil if FILE's buffer exists and has been displayed."
-  (let ((buf (find-buffer-visiting file)))
-    (if buf
-      (let ((display-count (buffer-local-value 'buffer-display-count buf)))
-        (if (> display-count 0) display-count nil)))))
-
-(defsubst keep-default-and-visible-recentf-p (file)
-  "Return non-nil if recentf would, by default, keep FILE, and
+  (defsubst keep-default-and-visible-recentf-p (file)
+    "Return non-nil if recentf would, by default, keep FILE, and
 FILE has been displayed."
-  (if (recentf-keep-default-predicate file)
-      (file-was-visible-p file)))
+    (if (recentf-keep-default-predicate file)
+        (file-was-visible-p file)))
 
-;; When a buffer is closed, remove the associated file from the recentf
-;; list if (1) recentf would have, by default, removed the file, or
-;; (2) the buffer was never displayed.  This is useful because, for
-;; example, CEDET opens a lot of files in the background to generate
-;; its tags database, etc.
-(setq recentf-keep '(keep-default-and-visible-recentf-p))
+  ;; When a buffer is closed, remove the associated file from the recentf
+  ;; list if (1) recentf would have, by default, removed the file, or
+  ;; (2) the buffer was never displayed.  This is useful because, for
+  ;; example, CEDET opens a lot of files in the background to generate
+  ;; its tags database, etc.
+  (setq recentf-keep '(keep-default-and-visible-recentf-p))
 
-(recentf-mode 1)
+  (recentf-mode 1)
+
+  ;; I don't understand why, but it seems I need to load the list manually, after changing save-file
+  (recentf-load-list))
 #+END_SRC
 
 Using recentf mode we can implement command to undo last killed buffer
@@ -1116,7 +1116,6 @@ Using recentf mode we can implement command to undo last killed buffer
 
 #+END_SRC
 
-
 **** saveplace
 
 #+BEGIN_QUOTE
@@ -1125,9 +1124,9 @@ where it was when you previously visited the same file.
 #+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp
-(require 'saveplace)
 (setq-default save-place t)
 (setq save-place-file (concat conf-tmp-dir "places"))
+(require 'saveplace)
 #+END_SRC
 
 I find this quite practical...
@@ -1171,6 +1170,10 @@ Enable cua-mode for rectangular selections
 (cua-mode 1)
 (setq cua-enable-cua-keys nil)
 #+END_SRC
+
+
+
+
 
 
 

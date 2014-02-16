@@ -1,8 +1,9 @@
-;;; .emacs.el --- steckemacs
+;;; .emacs.el --- Emacs Ayoshi
 
 ;; Copyright 2013, Steckerhalter
+;; Copyright 2014, Ayoshi
 
-;; Author: steckerhalter
+;; Original Author: steckerhalter
 ;; Keywords: emacs configuration init
 ;; URL: https://github.com/steckerhalter/steckemacs
 
@@ -29,22 +30,22 @@
 ;; ELPA, Marmelade and MELPA on startup. Instead of splitting
 ;; everything up I try to keep everything in one file. My theme called
 ;; `grandshell` is loaded from MELPA too. The literate configuration
-;; is kept in `steckemacs.org' and this file serves only as a way to
+;; is kept in `config.org' and this file serves only as a way to
 ;; load that config.
 
 ;;; Requirements:
 
-;; Emacs 24.3.50
+;; Emacs 24.3
 
 ;;; Code:
 ;;(setq ns-use-srgb-colorspace t)
 (require 'cl)
 (package-initialize)
 
-(setq steckemacs-directory (file-name-directory (file-truename load-file-name)))
+(setq config-directory (file-name-directory (file-truename load-file-name)))
 (setq org-confirm-babel-evaluate nil)
 
-(org-babel-load-file (expand-file-name "steckemacs.org" steckemacs-directory))
+(org-babel-load-file (expand-file-name "config.org" config-directory))
 
 ;;; .emacs ends here
 (custom-set-variables

@@ -6,18 +6,21 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/css/style.css" />
 
 #+BEGIN_SRC emacs-lisp :tangle no :results silent
-(org-babel-tangle-file "steckemacs.org" "steckemacs.el" "emacs-lisp")
+(org-babel-tangle-file "config.org" "config.el" "emacs-lisp")
 #+END_SRC
 
 
 * Usage
 
-*steckemacs-ayoshi* is an Emacs configuration based on an original config by Steckerhalter http://steckerhalter.co.vu/. The main diferrence from an original is that this configuration tries to replace VIM, and uses evil mode heavily. The goal is to make Emacs a much better VIM.
+*Emacs-ayoshi* is an Emacs configuration heavily based on an original config by Steckerhalter http://steckerhalter.co.vu/ and [[https://github.com/overtone/emacs-live][Emacs Live]].
+ This configuration tries to replace VIM, and uses evil mode heavily. The goal is to make Emacs a much better VIM.
 
-The second goal is to keep everything in one file =steckemacs.org= (plus =.emacs= for the initialization) and not as many others to split it over lots of files and directories. Packages are retrieved from the Emacs package repositories on the internet on the first startup.
+The second goal is to keep everything in one file =config.org= (plus =.emacs= for the initialization) and not as many others to split it over lots of files and directories. Packages are retrieved from the Emacs package repositories on the internet on the first startup.
 
 The source code is hosted on Github: [[https://github.com/ayoshi/steckemacs]]
-The original steckemacs source code is hosted  here: [[https://github.com/steckerhalter/steckemacs]]
+The original steckemacs source code is hosted  here:The original steckemacs source code is hosted  here: [[https://github.com/steckerhalter/steckemacs]]
+ [[https://github.com/steckerhalter/steckemacs]]
+
 
 *To use this setup please use Emacs 24.3.50 or later (currently that's the development snapshot). Older versions don't work because I use some of the new features of what is to become Emacs 24.4*
 
@@ -81,6 +84,9 @@ This table is generated with an Elisp block =keys-doc= from an Org table which i
 * Code
 
 ** Startup settings
+
+Before we install any package - we need to clean up a bit, set up some sane defaults, and remove small annoyances. All the settings below do not require any additional package.
+
 *** Directories
 
 Set up special directories first
@@ -120,7 +126,7 @@ The variable =load-path= lists all the directories where Emacs should look for E
 
 Here we create the directory =~/.emacs.d/elisp= if it does not exist, add it to the =load-path=. Doing that any =.el= or =.elc= files in this directory can be required from *emacs*.
 
-*** OS Specific Settings
+*** OS specific settings
 
 **** Linux specific setup
 
@@ -180,14 +186,24 @@ We'll set all coding systems to UTF-8
 (setq utf-translate-cjk-mode nil)
 #+END_SRC
 
-*** General Settings
+*** Basic interface settings
+
+First - let's clean up some visual clutter
+
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t
+      indicate-buffer-boundaries 'right)             ;fringe markers
+
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+#+END_SRC
+
+The following will do some interface changes, and will fix some annoying quirks
 
 #+BEGIN_SRC emacs-lisp
 (setq
- inhibit-startup-message t
- require-final-newline t          ;auto add newline at the end of file
  column-number-mode t             ;show the column number
- default-major-mode 'text-mode    ;use text mode per default
  mouse-yank-at-point t     ;middle click with the mouse yanks at point
  history-length 250        ;default is 30
  confirm-nonexistent-file-or-buffer nil ;don't ask to create a buffer
@@ -200,24 +216,25 @@ We'll set all coding systems to UTF-8
  mouse-wheel-scroll-amount '(1 ((shift) . 5) ((control))) ;make mouse scrolling smooth
  indicate-buffer-boundaries 'right             ;fringe markers
  split-height-threshold 110                   ;more readily split horziontally
- enable-recursive-minibuffers t
- )
+ enable-recursive-minibuffers t)
 
 (put 'narrow-to-region 'disabled nil)   ;narrow to region should be enabled by default
 #+END_SRC
 
-*** Default Settings
+*** Default editor settings
+
+These have to be set as defaults.
 
 #+BEGIN_SRC emacs-lisp
 (setq-default
+ default-major-mode 'text-mode    ;use text mode per default
  tab-width 4
  indent-tabs-mode nil                   ;use spaces instead of tabs
  c-basic-offset 4                       ;"tab" with in c-related modes
  c-hungry-delete-key t                  ;delete more than one space
- )
+ require-final-newline t          ;auto add newline at the end of file
+ fill-column 72)
 #+END_SRC
-
-These have to be set as defaults.
 
 *** Prompt Behavior
 
@@ -250,7 +267,6 @@ Also Emacs should be able to kill processes without asking ([[(process-query)][l
       version-control t)
 #+END_SRC
 
-
 *** Scratch buffer
 
 #+BEGIN_SRC emacs-lisp
@@ -268,6 +284,40 @@ Also Emacs should be able to kill processes without asking ([[(process-query)][l
       query-replace-highlight t
       next-error-highlight t
       next-error-highlight-no-select t)
+#+END_SRC
+*** Mouse should work in terminal
+
+#+BEGIN_SRC emacs-lisp
+(require 'mouse)
+#+END_SRC
+
+Mouse mode must be initialised for each new terminal [[http://stackoverflow.com/a/6798279/27782]]
+
+#+BEGIN_SRC emacs-lisp
+(defun initialise-mouse-mode (&optional frame)
+  "Initialise mouse mode for the current terminal."
+  (if (not frame) ;; The initial call.
+      (xterm-mouse-mode 1)
+    ;; Otherwise called via after-make-frame-functions.
+    (if xterm-mouse-mode
+        ;; Re-initialise the mode in case of a new terminal.
+        (xterm-mouse-mode 1))))
+
+
+;; Evaluate both now (for non-daemon emacs) and upon frame creation
+;; (for new terminals via emacsclient).
+(initialise-mouse-mode)
+(add-hook 'after-make-frame-functions 'initialise-mouse-mode)
+
+(setq mouse-yank-at-point t)
+
+(global-set-key [mouse-4] '(lambda ()
+                             (interactive)
+                             (scroll-down 1)))
+
+(global-set-key [mouse-5] '(lambda ()
+                             (interactive)
+                             (scroll-up 1)))
 #+END_SRC
 
 
@@ -499,18 +549,6 @@ Quite a big list of packages. When Emacs starts up the first time it takes quite
 #+END_SRC
 
 This part first checks if there is an internet connection. If true it refreshes the package archive cache and goes on to install all the packages that are not yet installed.
-
-** Set up global modes
-
-#+BEGIN_SRC emacs-lisp
-(global-auto-revert-mode 1)  ;auto revert buffers when changed on disk
-(show-paren-mode t)          ;visualize()
-(iswitchb-mode t)            ;use advanced tab switching
-(blink-cursor-mode -1)       ;no cursor blinking
-(tool-bar-mode -1)           ;disable the awful toolbar
-(menu-bar-mode -1)           ;no menu, you can toggle it with C-c m
-(scroll-bar-mode -1)         ;disable the sroll bar
-#+END_SRC
 
 ** Set up key bindings
 

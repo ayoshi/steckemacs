@@ -1060,6 +1060,7 @@ This package maintains a menu for visiting files that were operated on recently.
 
 #+BEGIN_SRC emacs-lisp
 (require 'recentf)
+
 (setq recentf-save-file (expand-file-name (concat conf-tmp-dir "/recentf"))
       recentf-max-saved-items 200)
 
@@ -1088,11 +1089,33 @@ FILE has been displayed."
 ;; (2) the buffer was never displayed.  This is useful because, for
 ;; example, CEDET opens a lot of files in the background to generate
 ;; its tags database, etc.
-;; (setq recentf-keep '(keep-default-and-visible-recentf-p))
+(setq recentf-keep '(keep-default-and-visible-recentf-p))
 
+(recentf-mode 1)
+#+END_SRC
 
+Using recentf mode we can implement command to undo last killed buffer
+
+#+BEGIN_SRC emacs-lisp
+(defun undo-kill-buffer (arg)
+  "Re-open the last buffer killed.  With ARG, re-open the nth buffer."
+  (interactive "p")
+  (let ((recently-killed-list (copy-sequence recentf-list))
+        (buffer-files-list
+         (delq nil (mapcar (lambda (buf)
+                             (when (buffer-file-name buf)
+                               (expand-file-name (buffer-file-name buf)))) (buffer-list)))))
+    (mapc
+     (lambda (buf-file)
+       (setq recently-killed-list
+             (delq buf-file recently-killed-list)))
+     buffer-files-list)
+    (find-file
+     (if arg (nth arg recently-killed-list)
+       (car recently-killed-list)))))
 
 #+END_SRC
+
 
 **** saveplace
 

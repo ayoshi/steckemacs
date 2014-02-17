@@ -609,7 +609,8 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-x a s           | General   | Toggle auto saving of buffers                             | 'auto-save-buffers-enhanced-toggle-activity                 |
 | C-c d             | General   | Change dictionary                                         | 'ispell-change-dictionary                                   |
 | C-c C-f           | General   | Toggle flyspell mode (spellchecking)                      | 'flyspell-mode                                              |
-| <M-x>             | General   | Smex (execute command)                                    | 'smex                                                       |
+| M-x               | General   | Smex (execute command)                                    | 'smex                                                       |
+| M-X               | General   | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
 | C-h C-h           | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
 | C-h h             | General   | Helm navigate project files                               | 'helm-projectile                                            |
 | <C-S-iso-lefttab> | General   | Helm for files                                            | 'helm-for-files                                             |
@@ -726,8 +727,8 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-h C-.           | Org       | Open/switch to home.org                                   | (lambda () (interactive) (find-file "~/org/home.org"))      |
 | C-h C-u           | Org       | Open/switch to work.org                                   | (lambda () (interactive) (find-file "~/org/work.org"))      |
 | C-h C-w           | Org       | Cut the current subtree into the clipboard                | 'org-cut-subtree                                            |
-| C-c v             | PHP       | var dump die template                                     | 'var_dump-die                                               |
-| C-c V             | PHP       | var dump template                                         | 'var_dump                                                   |
+| C-c v             | PHP       | var dump die template                                     | 'var_dump-die                                                |
+| C-c V             | PHP       | var dump template                                         | 'var_dump                                                    |
 | M-;               | Evil      | Comment/Uncomment line                                    | 'evilnc-comment-or-uncomment-lines                          |
 | C-c l             | Evil      | Comment/Uncomment to the line                             | 'evilnc-comment-or-uncomment-to-the-line                    |
 | C-c c             | Evil      | Copy and Comment lines                                    | 'evilnc-copy-and-comment-lines                              |
@@ -1220,8 +1221,6 @@ Enable cua-mode for rectangular selections
 (setq cua-enable-cua-keys nil)
 #+END_SRC
 
-
-
 **** ibuffer
 
 Use ibuffer integrated with ibuffer-vc.
@@ -1256,27 +1255,9 @@ Use ibuffer integrated with ibuffer-vc.
   (ad-activate 'ibuffer)
 #+END_SRC
 
+**** auto-save-buffers-enhanced
 
-*** auctex-mode
-
-#+BEGIN_SRC emacs-lisp
-(setq TeX-PDF-mode t)
-(setq TeX-parse-self t)
-(setq TeX-auto-save t)
-(setq TeX-save-query nil)
-
-(add-hook 'doc-view-mode-hook 'auto-revert-mode)
-(add-hook 'TeX-mode-hook
-          '(lambda ()
-             (define-key TeX-mode-map (kbd "<C-f8>")
-               (lambda ()
-                 (interactive)
-                 (TeX-command-menu "LaTeX")))
-             )
-          )
-#+END_SRC
-
-*** auto-save-buffers-enhanced
+Default autosave sucks. This one is much better
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (require 'auto-save-buffers-enhanced)
@@ -1285,8 +1266,7 @@ Use ibuffer integrated with ibuffer-vc.
 (setq auto-save-buffers-enhanced-interval 1.5)
 (setq auto-save-buffers-enhanced-quiet-save-p t)
 #+END_SRC
-
-*** back-button
+**** back-button
 
 #+BEGIN_QUOTE
 Back-button provides an alternative method for navigation by analogy with the "back" button in a web browser.
@@ -1305,6 +1285,200 @@ https://raw.github.com/rolandwalker/back-button/master/back_button_example.png
 (setq back-button-local-keystrokes nil) ;don't overwrite C-x SPC binding
 (require 'back-button)
 (back-button-mode 1)
+#+END_SRC
+**** diff-hl
+
+#+BEGIN_QUOTE
+diff-hl-mode highlights uncommitted changes on the left side of the window, allows you to jump between and revert them selectively.
+I'm not sure if it's better than git-gutter, but I'll sitk to it for now.
+
+#+END_QUOTE
+
+Github: https://github.com/dgutov/diff-hl
+
+#+BEGIN_SRC emacs-lisp
+(global-diff-hl-mode)
+(diff-hl-margin-mode)
+
+(defun my-diff-hl-update ()
+  (with-current-buffer (current-buffer) (diff-hl-update)))
+
+(add-hook 'magit-refresh-file-buffer-hook 'my-diff-hl-update)
+#+END_SRC
+
+Turn on the global mode and use the margin (not the fringe) to show the diff. Run =diff-hl-update= via =magit-refresh-file-buffer-hook= (which is run for each buffer after a commit).
+
+**** dired and dired+
+
+#+BEGIN_QUOTE
+Dired makes an Emacs buffer containing a listing of a directory, and
+optionally some of its subdirectories as well.  You can use the normal
+Emacs commands to move around in this buffer, and special Dired commands
+to operate on the listed files.
+#+END_QUOTE
+
+Dired is nice way to browse the directory tree. I have added =dired+= which
+
+#+BEGIN_QUOTE
+extends functionalities provided by standard GNU Emacs libraries dired.el, dired-aux.el, and dired-x.el. The standard functions are all available, plus many more.
+#+END_QUOTE
+
+See the [[http://www.emacswiki.org/emacs/DiredPlus][EmacsWiki]] for detailed information on =dired+=.
+
+Being in a dired buffer it is possible to make the buffer writable and thus rename files and permissions by editing the buffer. Use =C-x C-q= which runs the command =dired-toggle-read-only= to make that possible.
+
+I often use =dired-jump= (mapped to =C-h C-d=) which jumps to Dired buffer corresponding to current buffer.
+
+#+BEGIN_SRC emacs-lisp
+(setq dired-auto-revert-buffer t)
+(toggle-diredp-find-file-reuse-dir 1)
+(setq diredp-hide-details-initially-flag nil)
+(setq diredp-hide-details-propagate-flag nil)
+#+END_SRC
+
+It seems that both flags are necessary to make dired+ not hide the details. =toggle-diredp-find-file-reuse-dir= will make sure that there is only one buffer kept around for =dired=. Normally =dired= creates a buffer for every opened directory.
+
+**** ack-and-a-half + ag
+
+I use both Ack and Ag sometimes, they are similar though ag is written in C and is considerably faster
+
+#+BEGIN_SRC emacs-lisp
+
+;; Ack and a half
+(defalias 'ack 'ack-and-a-half)
+(defalias 'ack-same 'ack-and-a-half-same)
+(defalias 'ack-find-file 'ack-and-a-half-find-file)
+(defalias 'ack-find-file-same 'ack-and-a-half-find-file-same)
+
+;; ag
+(setq ag-highlight-search t)
+#+END_SRC
+
+**** ido-mode
+
+#+BEGIN_EXAMPLE
+Interactively do things with buffers and files
+#+END_EXAMPLE
+
+Great mode to quickly select buffers/files etc. Is built into Emacs since v22.
+
+Select the previous match with =C-r= and next match with =C-s=.
+To open =dired= at the current location press =C-d=.
+Make a directory with =M-m=.
+
+Use =C-j= if you want to create a file with what you have entered (and not the match).
+
+I also prefer flx-ido mode - flex matching simply kicks ass
+
+Github: https://github.com/lewang/flx
+
+#+BEGIN_SRC emacs-lisp
+(setq ido-enable-flex-matching t
+      ido-auto-merge-work-directories-length -1
+      ido-create-new-buffer 'always
+      ido-everywhere t
+      ido-default-buffer-method 'selected-window
+      ido-max-prospects 32
+      ido-ignore-extensions t
+      ido-use-filename-at-point 'guess
+      )
+(ido-mode 1)
+(flx-ido-mode 1)
+(setq ido-use-faces nil)
+(icomplete-mode 1)
+
+;; Ignore .DS_Store files with ido mode
+(add-to-list 'ido-ignore-files "\\.DS_Store")
+#+END_SRC
+
+I prefer the list of files to be sorted by mtime (like 'ls -ltr'), instead of alphabetically. Let's make it happen.
+
+#+BEGIN_SRC emacs-lisp
+;; sort ido filelist by mtime instead of alphabetically
+(add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
+(add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
+(defun ido-sort-mtime ()
+  (setq ido-temp-list
+        (sort ido-temp-list
+              (lambda (a b)
+                (let ((a-tramp-file-p (string-match-p ":\\'" a))
+                      (b-tramp-file-p (string-match-p ":\\'" b)))
+                  (cond
+                   ((and a-tramp-file-p b-tramp-file-p)
+                    (string< a b))
+                   (a-tramp-file-p nil)
+                   (b-tramp-file-p t)
+                   (t (time-less-p
+                       (sixth (file-attributes (concat ido-current-directory b)))
+                       (sixth (file-attributes (concat ido-current-directory a))))))))))
+  (ido-to-end  ;; move . files to end (again)
+   (delq nil (mapcar
+              (lambda (x) (and (char-equal (string-to-char x) ?.) x))
+              ido-temp-list))))
+#+END_SRC
+
+**** smex
+
+Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason that helm doesn't do flex matching
+
+#+BEGIN_SRC emacs-lisp
+(require 'smex)
+(smex-initialize)
+#+END_SRC
+
+
+**** popwin
+
+#+BEGIN_SRC emacs-lisp
+(require 'popwin)
+(setq display-buffer-function 'popwin:display-buffer)
+
+(setq popwin:special-display-config
+      '(("*Help*"  :height 30)
+        ("*Completions*" :noselect t)
+        ("*Messages*" :noselect t :height 30)
+        ("*Apropos*" :noselect t :height 30)
+        ("*compilation*" :noselect t)
+        ("*Backtrace*" :height 30)
+        ("*Messages*" :height 30)
+        ("*Occur*" :noselect t)
+        ("*Ido Completions*" :noselect t :height 30)
+        ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
+        ("*magit-diff*" :noselect t :height 40 :width 80)
+        ("*magit-edit-log*" :noselect t :height 15 :width 80)
+        ("\\*ansi-term\\*.*" :regexp t :height 30)
+        ("*shell*" :height 30)
+        (".*overtone.log" :regexp t :height 30)
+        ("*gists*" :height 30)
+        ("*sldb.*":regexp t :height 30)
+        ("*nrepl-error*" :height 30 :stick t)
+        ("*nrepl-doc*" :height 30 :stick t)
+        ("*nrepl-src*" :height 30 :stick t)
+        ("*nrepl-result*" :height 30 :stick t)
+        ("*nrepl-macroexpansion*" :height 30 :stick t)
+        ("*Kill Ring*" :height 30)
+        ("*Compile-Log*" :height 30 :stick t)
+        ("*git-gutter:diff*" :height 30 :stick t)))
+
+#+END_SRC
+
+*** auctex-mode
+
+#+BEGIN_SRC emacs-lisp
+(setq TeX-PDF-mode t)
+(setq TeX-parse-self t)
+(setq TeX-auto-save t)
+(setq TeX-save-query nil)
+
+(add-hook 'doc-view-mode-hook 'auto-revert-mode)
+(add-hook 'TeX-mode-hook
+          '(lambda ()
+             (define-key TeX-mode-map (kbd "<C-f8>")
+               (lambda ()
+                 (interactive)
+                 (TeX-command-menu "LaTeX")))
+             )
+          )
 #+END_SRC
 
 *** cider
@@ -1372,55 +1546,6 @@ I started using =company= because =auto-complete= seemed to be buggy and slow. S
  deft-auto-save-interval 20
  )
 #+END_SRC
-*** diff-hl
-
-#+BEGIN_QUOTE
-diff-hl-mode highlights uncommitted changes on the left side of the window, allows you to jump between and revert them selectively.
-#+END_QUOTE
-
-Github: https://github.com/dgutov/diff-hl
-
-#+BEGIN_SRC emacs-lisp
-(global-diff-hl-mode)
-(diff-hl-margin-mode)
-
-(defun my-diff-hl-update ()
-  (with-current-buffer (current-buffer) (diff-hl-update)))
-
-(add-hook 'magit-refresh-file-buffer-hook 'my-diff-hl-update)
-#+END_SRC
-
-Turn on the global mode and use the margin (not the fringe) to show the diff. Run =diff-hl-update= via =magit-refresh-file-buffer-hook= (which is run for each buffer after a commit).
-
-*** dired and dired+
-
-#+BEGIN_QUOTE
-Dired makes an Emacs buffer containing a listing of a directory, and
-optionally some of its subdirectories as well.  You can use the normal
-Emacs commands to move around in this buffer, and special Dired commands
-to operate on the listed files.
-#+END_QUOTE
-
-Dired is nice way to browse the directory tree. I have added =dired+= which
-
-#+BEGIN_QUOTE
-extends functionalities provided by standard GNU Emacs libraries dired.el, dired-aux.el, and dired-x.el. The standard functions are all available, plus many more.
-#+END_QUOTE
-
-See the [[http://www.emacswiki.org/emacs/DiredPlus][EmacsWiki]] for detailed information on =dired+=.
-
-Being in a dired buffer it is possible to make the buffer writable and thus rename files and permissions by editing the buffer. Use =C-x C-q= which runs the command =dired-toggle-read-only= to make that possible.
-
-I often use =dired-jump= (mapped to =C-h C-d=) which jumps to Dired buffer corresponding to current buffer.
-
-#+BEGIN_SRC emacs-lisp
-(setq dired-auto-revert-buffer t)
-(toggle-diredp-find-file-reuse-dir 1)
-(setq diredp-hide-details-initially-flag nil)
-(setq diredp-hide-details-propagate-flag nil)
-#+END_SRC
-
-It seems that both flags are necessary to make dired+ not hide the details. =toggle-diredp-find-file-reuse-dir= will make sure that there is only one buffer kept around for =dired=. Normally =dired= creates a buffer for every opened directory.
 
 *** elpy
 
@@ -1449,22 +1574,6 @@ Github: https://github.com/jorgenschaefer/elpy
 #+END_SRC
 
 I'm using =flycheck= so please don't use =flymake= (which is old and bugly). Also RET should trigger completion for me and not a newline.
-
-*** ack-and-a-half + ag
-
-I use both sometimes, they are similar though ag is written in C and is considerably faster
-
-#+BEGIN_SRC emacs-lisp
-
-;; Ack and a half
-(defalias 'ack 'ack-and-a-half)
-(defalias 'ack-same 'ack-and-a-half-same)
-(defalias 'ack-find-file 'ack-and-a-half-find-file)
-(defalias 'ack-find-file-same 'ack-and-a-half-find-file-same)
-
-;; ag
-(setq ag-highlight-search t)
-#+END_SRC
 
 *** eval-sexp-fu
 
@@ -1698,66 +1807,6 @@ Highlights the word/symbol at point and any other occurrences in view. Also allo
 (add-hook 'prog-mode-hook 'highlight-symbol-mode)
 #+END_SRC
 
-*** ido-mode
-
-#+BEGIN_EXAMPLE
-Interactively do things with buffers and files
-#+END_EXAMPLE
-
-Great mode to quickly select buffers/files etc. Is built into Emacs since v22.
-
-Select the previous match with =C-r= and next match with =C-s=.
-To open =dired= at the current location press =C-d=.
-Make a directory with =M-m=.
-
-Use =C-j= if you want to create a file with what you have entered (and not the match).
-
-#+BEGIN_SRC emacs-lisp
-(setq ido-enable-flex-matching t
-      ido-auto-merge-work-directories-length -1
-      ido-create-new-buffer 'always
-      ido-everywhere t
-      ido-default-buffer-method 'selected-window
-      ido-max-prospects 32
-      ido-ignore-extensions t
-      ido-use-filename-at-point 'guess
-      )
-(ido-mode 1)
-(flx-ido-mode 1)
-(setq ido-use-faces nil)
-
-;; Ignore .DS_Store files with ido mode
-(add-to-list 'ido-ignore-files "\\.DS_Store")
-#+END_SRC
-
-I prefer the list of files to be sorted by mtime (like 'ls -ltr'), instead of alphabetically. Let's make it happen.
-
-#+BEGIN_SRC emacs-lisp
-;; sort ido filelist by mtime instead of alphabetically
-(add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
-(add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
-(defun ido-sort-mtime ()
-  (setq ido-temp-list
-        (sort ido-temp-list
-              (lambda (a b)
-                (let ((a-tramp-file-p (string-match-p ":\\'" a))
-                      (b-tramp-file-p (string-match-p ":\\'" b)))
-                  (cond
-                   ((and a-tramp-file-p b-tramp-file-p)
-                    (string< a b))
-                   (a-tramp-file-p nil)
-                   (b-tramp-file-p t)
-                   (t (time-less-p
-                       (sixth (file-attributes (concat ido-current-directory b)))
-                       (sixth (file-attributes (concat ido-current-directory a))))))))))
-  (ido-to-end  ;; move . files to end (again)
-   (delq nil (mapcar
-              (lambda (x) (and (char-equal (string-to-char x) ?.) x))
-              ido-temp-list))))
-#+END_SRC
-
-Github: https://github.com/lewang/flx
-
 *** iedit
 
 #+BEGIN_SRC emacs-lisp
@@ -1842,8 +1891,6 @@ Other handy keys:
 try to press TAB
 #+END_SRC
 
-I have bound =magit-status= to =C-c g= and =magit-log= to =C-c l=.
-
 See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more information.
 
 #+BEGIN_SRC emacs-lisp
@@ -1852,9 +1899,16 @@ See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more infor
 (setq magit-save-some-buffers nil) ;don't ask to save buffers
 (setq magit-set-upstream-on-push t) ;ask to set upstream
 (setq magit-diff-refine-hunk t) ;show word-based diff for current hunk
+#+END_SRC
 
-;; q should fully quit session
-(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+One of the annoying things about Emacs is that sometimes it's hard to return to the previous state, from some smartypants major mode. The following two lines fix this for magit buffers.
+
+q and ESC should fully quit magit session
+
+
+#+BEGIN_SRC emacs-lisp
+(define-key magit-status-mode-map (kbd "q") 'magit-mode-quit-window)
+(define-key magit-status-mode-map (kbd "<escape>") 'magit-mode-quit-window)
 #+END_SRC
 
 Committing should act like =git commit -a= by default.

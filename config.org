@@ -1426,7 +1426,6 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
 (smex-initialize)
 #+END_SRC
 
-
 **** popwin
 
 #+BEGIN_SRC emacs-lisp
@@ -1456,11 +1455,100 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*nrepl-src*" :height 30 :stick t)
         ("*nrepl-result*" :height 30 :stick t)
         ("*nrepl-macroexpansion*" :height 30 :stick t)
+        ("*fixmee notices*" :height 30 :stick t)
         ("*Kill Ring*" :height 30)
         ("*Compile-Log*" :height 30 :stick t)
         ("*git-gutter:diff*" :height 30 :stick t)))
 
+;; TODO: Rebind esc and q in all popup windows to quit them
+
 #+END_SRC
+**** magit
+
+Magit is the king of Git interaction for Emacs.
+
+There's a short [[http://www.emacswiki.org/emacs/Magit#toc1][Crash Course on Emacswiki]]:
+
+#+BEGIN_SRC org
+- M-x magit-status to see git status, and in the status buffer:
+- s to stage files
+- c to commit (type in your commit message then C-c C-c to save the message and commit)
+- b b to switch to a branch
+
+Other handy keys:
+
+- P P to do a git push
+- F F to do a git pull
+
+try to press TAB
+#+END_SRC
+
+See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more information.
+
+#+BEGIN_SRC emacs-lisp
+;;(when (fboundp 'file-notify-add-watch)
+ ;; (add-hook 'magit-status-mode-hook 'magit-filenotify-mode))
+(setq magit-save-some-buffers nil) ;don't ask to save buffers
+(setq magit-set-upstream-on-push t) ;ask to set upstream
+(setq magit-diff-refine-hunk t) ;show word-based diff for current hunk
+#+END_SRC
+
+One of the annoying things about Emacs is that sometimes it's hard to return to the previous state, from some smartypants major mode. The following two lines fix this for magit buffers.
+
+q and ESC should fully quit magit session
+
+
+#+BEGIN_SRC emacs-lisp
+(define-key magit-status-mode-map (kbd "q") 'magit-mode-quit-window)
+(define-key magit-status-mode-map (kbd "<escape>") 'magit-mode-quit-window)
+#+END_SRC
+
+Committing should act like =git commit -a= by default.
+
+When Emacs has been compiled with inotiy support...
+
+#+BEGIN_SRC shell-script
+#./configure --with-file-notification=inotify
+#+END_SRC
+
+...the function =file-notify-add-watch= is bound and we add =magit-filenotify-mode= to the hook so that file updates get reflected automatically in magit status.
+
+**** fasd
+
+#+BEGIN_QUOTE
+Fasd (pronounced similar to "fast") is a command-line productivity booster.
+Fasd offers quick access to files and directories for POSIX shells. It is
+inspired by tools like autojump
+#+END_QUOTE
+
+The command-line tool is available an Github: https://github.com/clvv/fasd
+
+The =global-fasd-mode= was written by Steckerhalter. It's purpose is to make the quick access DB from =fasd= available in Emacs and also to add visited files and directories from Emacs to the =fasd= DB.
+
+Github: https://github.com/steckerhalter/emacs-fasd
+
+#+BEGIN_SRC emacs-lisp
+(global-fasd-mode 1)
+#+END_SRC
+**** fixmee
+#+BEGIN_QUOTE
+Fixmee-mode tracks fixme notices in code comments, highlights them, ranks them by urgency, and lets you navigate to them quickly.
+
+A distinguishing feature of this library is that it tracks the urgency of each notice, allowing the user to jump directly to the most important problems.
+#+END_QUOTE
+
+=fixmee= was written by Roland Walker and lives on Github: https://github.com/rolandwalker/fixmee
+
+#+BEGIN_SRC emacs-lisp
+(global-fixmee-mode 1)
+#+END_SRC
+
+I had tried similar modes like =fic-ext=mode= but fount them lacking a bit. Let's see how this one performs...
+
+TODO: Seems not to work in org mode
+
+
+
 
 *** auctex-mode
 
@@ -1665,39 +1753,6 @@ Using [[https://startpage.com][startpage.com]] mobile view here as default searc
     (eww arg)))
 #+END_SRC
 
-*** fasd
-
-#+BEGIN_QUOTE
-Fasd (pronounced similar to "fast") is a command-line productivity booster.
-Fasd offers quick access to files and directories for POSIX shells. It is
-inspired by tools like autojump
-#+END_QUOTE
-
-The command-line tool is available an Github: https://github.com/clvv/fasd
-
-The =global-fasd-mode= was written by Steckerhalter. It's purpose is to make the quick access DB from =fasd= available in Emacs and also to add visited files and directories from Emacs to the =fasd= DB.
-
-Github: https://github.com/steckerhalter/emacs-fasd
-
-#+BEGIN_SRC emacs-lisp
-(global-fasd-mode 1)
-#+END_SRC
-
-*** fixmee
-#+BEGIN_QUOTE
-Fixmee-mode tracks fixme notices in code comments, highlights them, ranks them by urgency, and lets you navigate to them quickly.
-
-A distinguishing feature of this library is that it tracks the urgency of each notice, allowing the user to jump directly to the most important problems.
-#+END_QUOTE
-
-=fixmee= was written by Roland Walker and lives on Github: https://github.com/rolandwalker/fixmee
-
-#+BEGIN_SRC emacs-lisp
-(global-fixmee-mode 1)
-#+END_SRC
-
-I had tried similar modes like =fic-ext=mode= but fount them lacking a bit. Let's see how this one performs...
-
 *** flycheck-mode
 
 - Automatic on-the-fly syntax checking while editing
@@ -1870,56 +1925,6 @@ Got most of that from [[https://github.com/magnars/.emacs.d/blob/master/setup-js
 #+END_SRC
 
 =json-mode= adds a bit better syntax highlighting for =.json= files.
-
-*** magit
-
-Magit is the king of Git interaction for Emacs.
-
-There's a short [[http://www.emacswiki.org/emacs/Magit#toc1][Crash Course on Emacswiki]]:
-
-#+BEGIN_SRC org
-- M-x magit-status to see git status, and in the status buffer:
-- s to stage files
-- c to commit (type in your commit message then C-c C-c to save the message and commit)
-- b b to switch to a branch
-
-Other handy keys:
-
-- P P to do a git push
-- F F to do a git pull
-
-try to press TAB
-#+END_SRC
-
-See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more information.
-
-#+BEGIN_SRC emacs-lisp
-;;(when (fboundp 'file-notify-add-watch)
- ;; (add-hook 'magit-status-mode-hook 'magit-filenotify-mode))
-(setq magit-save-some-buffers nil) ;don't ask to save buffers
-(setq magit-set-upstream-on-push t) ;ask to set upstream
-(setq magit-diff-refine-hunk t) ;show word-based diff for current hunk
-#+END_SRC
-
-One of the annoying things about Emacs is that sometimes it's hard to return to the previous state, from some smartypants major mode. The following two lines fix this for magit buffers.
-
-q and ESC should fully quit magit session
-
-
-#+BEGIN_SRC emacs-lisp
-(define-key magit-status-mode-map (kbd "q") 'magit-mode-quit-window)
-(define-key magit-status-mode-map (kbd "<escape>") 'magit-mode-quit-window)
-#+END_SRC
-
-Committing should act like =git commit -a= by default.
-
-When Emacs has been compiled with inotiy support...
-
-#+BEGIN_SRC shell-script
-#./configure --with-file-notification=inotify
-#+END_SRC
-
-...the function =file-notify-add-watch= is bound and we add =magit-filenotify-mode= to the hook so that file updates get reflected automatically in magit status.
 
 *** markdown
 

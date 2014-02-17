@@ -448,6 +448,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
       '(ack-and-a-half
         ace-jump-mode
         ag
+        auto-compile
         evil
         surround
         evil-indent-textobject
@@ -497,6 +498,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         highlight-symbol
         htmlize
         iedit
+        ibuffer-vc
         jinja2-mode
         js2-mode
         json-mode
@@ -1072,6 +1074,15 @@ line instead."
 
 *** Set up language independent modes
 
+**** auto-compile
+
+#+BEGIN_SRC emacs-lisp
+(require 'auto-compile)
+
+(auto-compile-on-load-mode 1)
+(auto-compile-on-save-mode 1)
+#+END_SRC
+
 **** uniqify
 
 #+BEGIN_QUOTE
@@ -1211,8 +1222,39 @@ Enable cua-mode for rectangular selections
 
 
 
+**** ibuffer
 
+Use ibuffer integrated with ibuffer-vc.
 
+#+BEGIN_SRC emacs-lisp
+(require 'ibuffer-vc)
+
+(add-hook 'ibuffer-hook
+          (lambda ()
+            (ibuffer-vc-set-filter-groups-by-vc-root)
+            (unless (eq ibuffer-sorting-mode 'alphabetic)
+              (ibuffer-do-sort-by-alphabetic))))
+
+(setq ibuffer-formats
+      '((mark modified read-only vc-status-mini " "
+              (name 18 18 :left :elide)
+              " "
+              (size 9 -1 :right)
+              " "
+              (mode 16 16 :left :elide)
+              " "
+              (vc-status 16 16 :left)
+              " "
+              filename-and-process)))
+
+;; Switching to ibuffer puts the cursor on the most recent buffer
+(defadvice ibuffer (around ibuffer-point-to-most-recent) ()
+    "Open ibuffer with cursor pointed to most recent buffer name"
+    (let ((recent-buffer-name (buffer-name)))
+      ad-do-it
+      (ibuffer-jump-to-buffer recent-buffer-name)))
+  (ad-activate 'ibuffer)
+#+END_SRC
 
 
 *** auctex-mode
@@ -2330,7 +2372,7 @@ Visually makes non-current buffers less prominent. Currently disabled, but origi
 Github: https://github.com/mina86/auto-dim-other-buffers.el
 
 #+BEGIN_SRC emacs-lisp
-;;(auto-dim-other-buffers-mode -1)
+(auto-dim-other-buffers-mode -1)
 #+END_SRC
 
 ** Evil - make an Emacs into a better VIM
@@ -2521,6 +2563,7 @@ TODO move evil bindings to separate table
 ;; ;; Use DASH for documentaton
 (define-key evil-normal-state-map (kbd "?") 'dash-at-point)
 #+END_SRC
+
 
 ** Load minor mode with all the keybindings we've set
 

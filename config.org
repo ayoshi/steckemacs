@@ -22,8 +22,6 @@ The original steckemacs source code is hosted  here:The original steckemacs sour
  [[https://github.com/steckerhalter/steckemacs]]
 
 
-*To use this setup please use Emacs 24.3.50 or later (currently that's the development snapshot). Older versions don't work because I use some of the new features of what is to become Emacs 24.4*
-
 ** Installation
 
 Change to a directory of your choice and clone *steckemacs*:
@@ -161,10 +159,7 @@ Here we create the directory =~/.emacs.d/elisp= if it does not exist, add it to 
 
   ;; Work around a bug on OS X where system-name is a fully qualified
   ;; domain name
-  (setq system-name (car (split-string system-name "\\.")))
-
-  ;; Ensure the exec-path honours the shell PATH
-  (exec-path-from-shell-initialize))
+  (setq system-name (car (split-string system-name "\\."))))
 
   (setq x-select-enable-clipboard t)                           ;enable copy/paste from emacs to other apps
 
@@ -266,6 +261,15 @@ Also Emacs should be able to kill processes without asking ([[(process-query)][l
       kept-old-versions 2
       version-control t)
 #+END_SRC
+
+*** Custom file
+
+Custom file should be under it's own dir.
+
+#+BEGIN_SRC emacs-lisp
+(setq custom-file (expand-file-name (concat conf-custom-dir "emacs-custom.el")))
+#+END_SRC
+
 
 *** Scratch buffer
 
@@ -516,6 +520,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         ;;yphp-eldoc
         php-mode
         popup
+	    popwin
         projectile
         pretty-symbols
         pos-tip
@@ -551,6 +556,17 @@ Quite a big list of packages. When Emacs starts up the first time it takes quite
 #+END_SRC
 
 This part first checks if there is an internet connection. If true it refreshes the package archive cache and goes on to install all the packages that are not yet installed.
+
+** Post-package initialization
+
+Some things should be ran before everything else, but they require side packages, available in repositories.
+
+**** Ensure OSX version honors PATH added from shell
+
+#+BEGIN_SRC emacs-lisp
+(when (eq system-type 'darwin)
+  (exec-path-from-shell-initialize))
+#+END_SRC
 
 ** Set up key bindings
 
@@ -1494,13 +1510,14 @@ See the [[http://magit.github.io/magit/magit.html][Magit manual]] for more infor
 #+END_SRC
 
 One of the annoying things about Emacs is that sometimes it's hard to return to the previous state, from some smartypants major mode. The following two lines fix this for magit buffers.
-
-q and ESC should fully quit magit session
-
+Both q and ESC should fully quit magit session. That's how I want it
 
 #+BEGIN_SRC emacs-lisp
-(define-key magit-status-mode-map (kbd "q") 'magit-mode-quit-window)
-(define-key magit-status-mode-map (kbd "<escape>") 'magit-mode-quit-window)
+(defun magit-mode-exit-keys ()
+  (local-set-key (kbd "<escape>") 'magit-mode-quit-window)
+  (local-set-key (kbd "<escape>") 'magit-mode-quit-window))
+;; add to html-mode-hook
+(add-hook 'magit-mode-hook 'magit-mode-exit-keys)
 #+END_SRC
 
 Committing should act like =git commit -a= by default.

@@ -78,7 +78,6 @@ I only describe my custom key combinations currently. To learn the standard Emac
 
 This table is generated with an Elisp block =keys-doc= from an Org table which is also used in the code [[*Key%20Bindings][further below]].
 
-
 * Code
 
 ** Startup settings
@@ -192,6 +191,12 @@ First - let's clean up some visual clutter
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+#+END_SRC
+
+The only way to disable both audio and visual bells.
+
+#+BEGIN_SRC emacs-lisp
+(setq ring-bell-function (lambda () ()))
 #+END_SRC
 
 The following will do some interface changes, and will fix some annoying quirks

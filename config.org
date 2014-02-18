@@ -1093,8 +1093,25 @@ line instead."
 #+END_SRC
 
 ** Modes
+*** Disabled modes - those I'm not yet sure about
+**** auto-dim-other-buffers
+#+BEGIN_QUOTE
+Visually makes non-current buffers less prominent. Currently disabled, but original author liked it.
+#+END_QUOTE
 
-*** Set up language independent modes
+Github: https://github.com/mina86/auto-dim-other-buffers.el
+
+#+BEGIN_SRC emacs-lisp
+(auto-dim-other-buffers-mode -1)
+#+END_SRC
+*** Modes that change interface and behavior
+**** melpa-upstream-visit
+
+Adds a button to the package info page to visit the repository homepage.
+
+#+BEGIN_SRC emacs-lisp
+(require 'melpa-upstream-visit)
+#+END_SRC
 
 **** auto-compile
 
@@ -1462,6 +1479,7 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*Backtrace*" :height 30)
         ("*Messages*" :height 30)
         ("*Occur*" :noselect t)
+        ("*Ibuffer*" :noselect t :stick t)
         ("*Ido Completions*" :noselect t :height 30)
         ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
         ("*magit-diff*" :noselect t :height 40 :width 80)
@@ -1568,264 +1586,27 @@ A distinguishing feature of this library is that it tracks the urgency of each n
 I had tried similar modes like =fic-ext=mode= but fount them lacking a bit. Let's see how this one performs...
 
 TODO: Seems not to work in org mode
-
-
-
-
-*** auctex-mode
-
-#+BEGIN_SRC emacs-lisp
-(setq TeX-PDF-mode t)
-(setq TeX-parse-self t)
-(setq TeX-auto-save t)
-(setq TeX-save-query nil)
-
-(add-hook 'doc-view-mode-hook 'auto-revert-mode)
-(add-hook 'TeX-mode-hook
-          '(lambda ()
-             (define-key TeX-mode-map (kbd "<C-f8>")
-               (lambda ()
-                 (interactive)
-                 (TeX-command-menu "LaTeX")))
-             )
-          )
-#+END_SRC
-
-*** cider
+**** smart-mode-line
 
 #+BEGIN_QUOTE
-CIDER is Clojure IDE and REPL for Emacs, built on top of nREPL, the Clojure networked REPL server. It's a great alternative to the now deprecated combination of SLIME + swank-clojure.
+Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from small to large monitors by using a prefix feature and smart truncation.
 #+END_QUOTE
 
-It was formerly called =nrepl.el= and is written by Bozhidar Batsov.
-
-Github: https://github.com/clojure-emacs/cider
+It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortcomings and =sml= does a good job at improving it.
 
 #+BEGIN_SRC emacs-lisp
-(setq cider-popup-stacktraces nil)
+(setq sml/vc-mode-show-backend t)
+(sml/setup)
+;;(sml/apply-theme 'dark)
+;;(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
+;;(set-face-attribute 'sml/folder nil :foreground "#f09fff")
+;;(set-face-attribute 'sml/filename nil :foreground "#f6df92")
+;;(set-face-attribute 'sml/vc-edited nil :foreground "#ff5f87")
 #+END_SRC
 
-*** company
-#+BEGIN_QUOTE
-Company stands for "complete anything". It uses pluggable back-ends and front-ends to retrieve and display completion candidates.
+Show the encoding and add VC information to the mode-line. Respect the theme-colors and customize some of the =sml= colors.
 
-It comes with several back-ends such as Elisp, Clang, Semantic, Eclim, Ropemacs, Ispell, dabbrev, etags, gtags, files, keywords and a few others.
-#+END_QUOTE
-
-#+CAPTION: company
-#+NAME: fig:co
-http://company-mode.github.io/images/company-semantic.png
-
-#+BEGIN_SRC emacs-lisp
-(require 'company)
-(setq company-idle-delay 0.3)
-(setq company-tooltip-limit 20)
-(setq company-minimum-prefix-length 2)
-(setq company-echo-delay 0)
-(setq company-auto-complete nil)
-(global-company-mode 0)
-(add-to-list 'company-backends 'company-dabbrev t)
-(add-to-list 'company-backends 'company-ispell t)
-(add-to-list 'company-backends 'company-files t)
-
-(defun my-pcomplete-capf ()
-  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
-(add-hook 'org-mode-hook #'my-pcomplete-capf)
-#+END_SRC
-
-I started using =company= because =auto-complete= seemed to be buggy and slow. Some of the company features are pretty cool, for example the ability to search within completions with =C-s= or to show the symbol definition with =C-w=. =<f1>= shows the full documentation of a symbol. I miss the popup from auto-complete a bit but I guess that's not so important in the end.
-
-**** Company for python - company-jedi
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'python-mode-hook 'company-jedi-start)
-#+END_SRC
-*** conf-mode
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.tks\\'" . org-mode))
-#+END_SRC
-
-*** deft
-#+BEGIN_SRC emacs-lisp
-(setq
- deft-extension "org"
- deft-directory "~/deft"
- deft-text-mode 'org-mode
- deft-use-filename-as-title t
- deft-auto-save-interval 20
- )
-#+END_SRC
-
-*** elpy
-
-Elpy makes setting up a great Python IDE a breeze. It's written by [[http://www.jorgenschaefer.de/][Jorgen Schäfer]] also known as =forcer=.
-
-Github: https://github.com/jorgenschaefer/elpy
-
-#+BEGIN_SRC emacs-lisp
-;; Support for pyenv
-(defvar pyenv-path "~/.pyenv"
-  "pyenv root directory.")
-
-(when (file-exists-p pyenv-path)
-  (let ((bin-path (concat pyenv-path "/bin"))
-        (shims-path (concat pyenv-path "/shims")))
-    (setenv "PATH"
-            (concat bin-path ":" shims-path ":"
-                    (getenv "PATH")))
-    (setq python-check-command (concat shims-path "/flake8"))
-    (setq elpy-rpc-python-command (concat shims-path "/python"))))
-
-(elpy-enable)
-(delq 'flymake-mode elpy-default-minor-modes)
-
-(elpy-use-ipython)
-#+END_SRC
-
-I'm using =flycheck= so please don't use =flymake= (which is old and bugly). Also RET should trigger completion for me and not a newline.
-
-*** eval-sexp-fu
-
-Flash some lights when evaluating expressions.
-
-#+BEGIN_SRC emacs-lisp
-(require 'eval-sexp-fu)
-(setq eval-sexp-fu-flash-duration 0.4)
-(turn-on-eval-sexp-fu-flash-mode)
-(key-chord-define lisp-interaction-mode-map "90" 'eval-sexp-fu-eval-sexp-inner-list)
-(key-chord-define emacs-lisp-mode-map "90" 'eval-sexp-fu-eval-sexp-inner-list)
-(define-key lisp-interaction-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
-(define-key lisp-interaction-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
-(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
-(define-key emacs-lisp-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
-#+END_SRC
-
-*** erc mode
-
-#+BEGIN_QUOTE
-ERC is a powerful, modular, and extensible IRC client for Emacs.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'erc-mode-hook (lambda ()
-                           (erc-truncate-mode t)
-                           (erc-fill-disable)
-                           (set (make-local-variable 'scroll-conservatively) 1000)
-                           (visual-line-mode)
-                           )
-          )
-(setq erc-timestamp-format "%H:%M "
-      erc-fill-prefix "      "
-      erc-insert-timestamp-function 'erc-insert-timestamp-left)
-(setq erc-interpret-mirc-color t)
-(setq erc-kill-buffer-on-part t)
-(setq erc-kill-queries-on-quit t)
-(setq erc-kill-server-buffer-on-quit t)
-(setq erc-server-send-ping-interval 45)
-(setq erc-server-send-ping-timeout 180)
-(setq erc-server-reconnect-timeout 60)
-(erc-track-mode t)
-(setq erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
-                                "324" "329" "332" "333" "353" "477"))
-(setq erc-hide-list '("JOIN" "PART" "QUIT" "NICK"))
-
-;; ------ template for .user.el
-;; (setq erc-prompt-for-nickserv-password nil)
-;; (setq erc-server "hostname"
-;;       erc-port 7000
-;;       erc-nick "user"
-;;       erc-user-full-name "user"
-;;       erc-email-userid "user"
-;;       erc-password "user:pw"
-;;       )
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(defun my-erc-connect ()
-  "Connect with ERC or open the last active buffer."
-  (interactive)
-  (if (erc-buffer-list)
-      (erc-track-switch-buffer 1)
-    (erc-tls :server erc-server :port erc-port :nick erc-nick :full-name erc-user-full-name :password erc-password)))
-#+END_SRC
-
-*** eww
-*Emacs Web Wowser* is the bult-in Emacs Webbrowser (Emacs 24.4 and later).
-
-Rationale: http://lars.ingebrigtsen.no/2013/06/eww.html
-
-#+BEGIN_SRC emacs-lisp
-(setq eww-search-prefix "https://startpage.com/do/m/mobilesearch?query=")
-#+END_SRC
-
-Using [[https://startpage.com][startpage.com]] mobile view here as default search because the default duckduckgo is just too slow for my taste.
-
-#+BEGIN_SRC emacs-lisp
-(defun my-eww-browse-dwim ()
-  "`eww' browse \"do what I mean\".
- Browse the url at point if there is one. Otherwise use the last
- kill-ring item and provide that to `eww'. If it is an url `eww'
- will browse it, if not `eww' will search for it using a search
- engine."
-  (interactive)
-  (let ((arg (or
-              (url-get-url-at-point)
-              (current-kill 0 t))))
-    (eww arg)))
-#+END_SRC
-
-*** flycheck-mode
-
-- Automatic on-the-fly syntax checking while editing
-- Fully automatic selection of the best syntax checker
-
-Supports many languages:  AsciiDoc, C/C++, CFEngine, Chef cookbooks, CoffeeScript, CSS, D, Elixir, Emacs Lisp, Erlang, Go, Haml, Handlebars, Haskell, HTML, Javascript, JSON, LESS, Lua, Perl, PHP, Puppet, Python, Ruby, Rust, RST (ReStructuredText), Sass, Scala, SCSS, Slim, Shell scripts (POSIX Shell, Bash and Zsh), TeX/LaTeX, XML, YAML
-
-Flycheck is written by [[http://lunaryorn.com/][Sebastian Wiesner]] a.ka =lunaryorn=.
-
-Github: https://github.com/flycheck/flycheck
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'php-mode-hook 'flycheck-mode)
-(add-hook 'sh-mode-hook 'flycheck-mode)
-(add-hook 'json-mode-hook 'flycheck-mode)
-(add-hook 'nxml-mode-hook 'flycheck-mode)
-(add-hook 'python-mode-hook 'flycheck-mode)
-(add-hook 'emacs-lisp-mode-hook 'flycheck-mode)
-(add-hook 'lisp-interaction-mode-hook 'flycheck-mode)
-(setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)) ;disable the annoying doc checker
-(setq flycheck-indication-mode 'left-fringe)
-#+END_SRC
-
-The modes where flycheck should be enabled.
-
-*** grizzl
-
-#+BEGIN_QUOTE
-Grizzl is a small utility library to be used in other Elisp code needing fuzzy search behaviour. It is optimized for large data sets, using a special type of lookup table and supporting incremental searches (searches where the result can be narrowed-down by only searching what is already matched).
-#+END_QUOTE
-
-The source code for Grizzl can be found on [[https://github.com/d11wtq/grizzl][Github]]. It is written by Chris Corbyn who also wrote the PHP REPL =Boris=.
-
-Currently it is used by [[https://github.com/bbatsov/projectile][Projectile]] in my config. I quite like Grizzl. It offers some benefits for when entries are longer. For most cases =IDO= is better suited though.
-
-#+BEGIN_SRC emacs-lisp
-(setq *grizzl-read-max-results* 30)
-#+END_SRC
-
-I would like to see more than just the default results of 10.
-
-*** haskell-mode
-
-#+BEGIN_SRC emacs-lisp
-(require 'haskell-mode)
-(setq haskell-indent-thenelse 3)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
-#+END_SRC
-
-*** helm
+**** helm
 
 #+BEGIN_QUOTE
 Helm is incremental completion and selection narrowing framework for Emacs. It will help steer you in the right direction when you're looking for stuff in Emacs (like buffers, files, etc).
@@ -1857,7 +1638,7 @@ I'm not using [[https://github.com/emacs-helm/helm/wiki#6-helm-find-files][Helm 
 
 I use [[https://github.com/emacs-helm/helm/wiki#8-helm-m-x][Helm M-x]] and also the separate [[https://github.com/emacs-helm/helm-descbinds][Helm Descbinds]] (=C-h b=) to get a quick key bindings overview.
 
-*** helm-swoop
+**** helm-swoop
 
 =helm-swoop= is a great Helm powered buffer search/occur interface:
 
@@ -1871,101 +1652,7 @@ Github: https://github.com/ShingoFukuyama/helm-swoop
 (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
 #+END_SRC
 
-*** highlight-symbol
-
-#+BEGIN_QUOTE
-Automatic and manual symbol highlighting for Emacs
-#+END_QUOTE
-
-Highlights the word/symbol at point and any other occurrences in view. Also allows to jump to the next or previous occurrence.
-
-#+BEGIN_SRC emacs-lisp
-(setq highlight-symbol-on-navigation-p t)
-(add-hook 'prog-mode-hook 'highlight-symbol-mode)
-#+END_SRC
-
-*** iedit
-
-#+BEGIN_SRC emacs-lisp
-(require 'iedit)
-(setq iedit-unmatched-lines-invisible-default t)
-#+END_SRC
-
-*** ielm
-
-IELM is short for Inferior Emacs Lisp Mode. It is a REPL for Emacs Lisp that is sometimes useful if you want to get immediate feedback and a prompt to work with. I tend to use the =*scratch*= buffer for explorations like that usually but would be probably better off to use IELM more often :)
-
-#+BEGIN_SRC emacs-lisp
-(eval-after-load 'ielm
-  '(progn
-     (add-hook 'inferior-emacs-lisp-mode-hook
-               (lambda ()
-                 (turn-on-eldoc-mode)))))
-#+END_SRC
-
-We need to tweak IELM a bit so we get completion and eldoc hints.
-
-*** jinja2-mode for twig
-
-Syntax highlighting for twig-templates
-
-#+BEGIN_SRC emacs-lisp
-(require 'jinja2-mode)
-(add-to-list 'auto-mode-alist '("\\.twig$" . jinja2-mode))
-#+END_SRC
-
-*** js2-mode
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-
-(setq js2-allow-rhino-new-expr-initializer nil)
-(setq js2-auto-indent-p nil)
-(setq js2-enter-indents-newline nil)
-(setq js2-global-externs '("module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON"))
-(setq js2-idle-timer-delay 0.1)
-(setq js2-indent-on-enter-key nil)
-(setq js2-mirror-mode nil)
-(setq js2-strict-inconsistent-return-warning nil)
-(setq js2-auto-indent-p t)
-(setq js2-include-rhino-externs nil)
-(setq js2-include-gears-externs nil)
-(setq js2-concat-multiline-strings 'eol)
-(setq js2-rebind-eol-bol-keys nil)
-(setq js2-mode-show-parse-errors nil)
-(setq js2-mode-show-strict-warnings nil)
-
-(add-hook 'js2-mode-hook (lambda () (flycheck-mode 1)))
-#+END_SRC
-
-Got most of that from [[https://github.com/magnars/.emacs.d/blob/master/setup-js2-mode.el][Magnars' .emacs.d]].
-
-*** json-mode
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
-#+END_SRC
-
-=json-mode= adds a bit better syntax highlighting for =.json= files.
-
-*** markdown
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-#+END_SRC
-
-Enable markdown-mode when the file suffixes match.
-
-*** melpa-upstream-visit
-
-Adds a button to the package info page to visit the repository homepage.
-
-#+BEGIN_SRC emacs-lisp
-(require 'melpa-upstream-visit)
-#+END_SRC
-
-*** move-text
+**** move-text
 
 Allows to move the current line or region up/down
 
@@ -1973,7 +1660,7 @@ Allows to move the current line or region up/down
 (require 'move-text)
 #+END_SRC
 
-*** multi-term
+**** multi-term
 
 #+BEGIN_QUOTE
 A package for creating and managing multiple terminal buffers in Emacs
@@ -2010,7 +1697,198 @@ The source code is on [[http://www.emacswiki.org/emacs//multi-term.el][EmacsWiki
 
 I'd like to have the terminal respect the default keys of the shell as much as possible hence I remap the non-standard bindings to the defaults. Furthermore I want to switch between Emacs-style navigation (term-line-mode) and raw terminal input (term-char-mode) quickly.
 
-*** nrepl-eval-sexp-fu
+
+TODO: Add region expand
+TODO: Add multiple cursor
+*** Programming modes independant of languages
+
+Like project management tools, parens management/coloring, completion frameworks, flycheck
+
+**** prog-mode
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
+#+END_SRC
+
+Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
+
+**** highlight-symbol
+
+#+BEGIN_QUOTE
+Automatic and manual symbol highlighting for Emacs
+#+END_QUOTE
+
+Highlights the word/symbol at point and any other occurrences in view. Also allows to jump to the next or previous occurrence.
+
+#+BEGIN_SRC emacs-lisp
+(setq highlight-symbol-on-navigation-p t)
+(add-hook 'prog-mode-hook 'highlight-symbol-mode)
+#+END_SRC
+
+**** grizzl
+
+#+BEGIN_QUOTE
+Grizzl is a small utility library to be used in other Elisp code needing fuzzy search behaviour. It is optimized for large data sets, using a special type of lookup table and supporting incremental searches (searches where the result can be narrowed-down by only searching what is already matched).
+#+END_QUOTE
+
+The source code for Grizzl can be found on [[https://github.com/d11wtq/grizzl][Github]]. It is written by Chris Corbyn who also wrote the PHP REPL =Boris=.
+
+Currently it is used by [[https://github.com/bbatsov/projectile][Projectile]] in my config. I quite like Grizzl. It offers some benefits for when entries are longer. For most cases =IDO= is better suited though.
+
+#+BEGIN_SRC emacs-lisp
+(setq *grizzl-read-max-results* 30)
+#+END_SRC
+
+I would like to see more than just the default results of 10.
+
+**** projectile
+
+#+BEGIN_QUOTE
+Projectile is a project interaction library for Emacs. Its goal is to provide a nice set of features operating on a project level without introducing external dependencies(when feasible). For instance - finding project files has a portable implementation written in pure Emacs Lisp without the use of GNU find(but for performance sake an indexing mechanism backed by external commands exists as well).
+#+END_QUOTE
+
+Projectile is written by Bozhidar Batsov.
+
+Github: https://github.com/bbatsov/projectile
+
+#+BEGIN_SRC emacs-lisp
+(require 'projectile nil t)
+(setq projectile-completion-system 'grizzl)
+#+END_SRC
+
+**** rainbow-mode
+
+#+BEGIN_QUOTE
+rainbow-mode is a minor mode for Emacs which displays strings representing colors with the color they represent as background.
+#+END_QUOTE
+
+Homepage: http://julien.danjou.info/projects/emacs-packages#rainbow-mode
+
+#+BEGIN_SRC emacs-lisp
+(dolist (hook '(css-mode-hook
+                html-mode-hook
+                js-mode-hook
+                emacs-lisp-mode-hook
+                org-mode-hook
+                text-mode-hook
+                ))
+  (add-hook hook 'rainbow-mode)
+  )
+#+END_SRC
+
+**** smartparens
+
+#+BEGIN_QUOTE
+Smartparens is minor mode for Emacs that deals with parens pairs and tries to be smart about it. It started as a unification effort to combine functionality of several existing packages in a single, compatible and extensible way to deal with parentheses, delimiters, tags and the like.
+#+END_QUOTE
+
+Written by Fuco and not used as it probably could be by myself. I really should spend some time to learn more about it :)
+
+Github: https://github.com/Fuco1/smartparens
+
+#+BEGIN_SRC emacs-lisp
+(require 'smartparens-config)
+(smartparens-global-mode t)
+(define-key sp-keymap (kbd "C-{") 'sp-select-previous-thing)
+(define-key sp-keymap (kbd "C-}") 'sp-select-next-thing)
+(define-key sp-keymap (kbd "C-\\") 'sp-select-previous-thing-exchange)
+(define-key sp-keymap (kbd "C-]") 'sp-select-next-thing-exchange)
+;; "fix"" highlight issue in scratch buffer
+(custom-set-faces '(sp-pair-overlay-face ((t ()))))
+#+END_SRC
+
+**** vlf
+#+BEGIN_QUOTE
+Emacs minor mode that allows viewing, editing, searching and comparing large files in batches. Batch size can be adjusted on the fly and bounds the memory that is to be used for operations on the file. This way multiple large files can be instantly and simultaneously accessed without swapping and degraded performance.
+#+END_QUOTE
+
+Github: https://github.com/m00natic/vlfi
+
+#+BEGIN_SRC emacs-lisp
+(setq vlf-application 'dont-ask)        ; just do it
+(setq vlf-batch-size 8192)              ; a bit more text per batch please
+(require 'vlf-integrate)                ; just do it for real
+#+END_SRC
+**** company
+#+BEGIN_QUOTE
+Company stands for "complete anything". It uses pluggable back-ends and front-ends to retrieve and display completion candidates.
+
+It comes with several back-ends such as Elisp, Clang, Semantic, Eclim, Ropemacs, Ispell, dabbrev, etags, gtags, files, keywords and a few others.
+#+END_QUOTE
+
+#+CAPTION: company
+#+NAME: fig:co
+http://company-mode.github.io/images/company-semantic.png
+
+#+BEGIN_SRC emacs-lisp
+(require 'company)
+(setq company-idle-delay 0.3)
+(setq company-tooltip-limit 20)
+(setq company-minimum-prefix-length 2)
+(setq company-echo-delay 0)
+(setq company-auto-complete nil)
+(global-company-mode 0)
+(add-to-list 'company-backends 'company-dabbrev t)
+(add-to-list 'company-backends 'company-ispell t)
+(add-to-list 'company-backends 'company-files t)
+
+(defun my-pcomplete-capf ()
+  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+(add-hook 'org-mode-hook #'my-pcomplete-capf)
+#+END_SRC
+
+Company for python - company-jedi
+
+#+BEGIN_SRC emacs-lisp
+;;(add-hook 'python-mode-hook 'company-jedi-start)
+#+END_SRC
+
+**** flycheck-mode
+
+- Automatic on-the-fly syntax checking while editing
+- Fully automatic selection of the best syntax checker
+
+Supports many languages:  AsciiDoc, C/C++, CFEngine, Chef cookbooks, CoffeeScript, CSS, D, Elixir, Emacs Lisp, Erlang, Go, Haml, Handlebars, Haskell, HTML, Javascript, JSON, LESS, Lua, Perl, PHP, Puppet, Python, Ruby, Rust, RST (ReStructuredText), Sass, Scala, SCSS, Slim, Shell scripts (POSIX Shell, Bash and Zsh), TeX/LaTeX, XML, YAML
+
+Flycheck is written by [[http://lunaryorn.com/][Sebastian Wiesner]] a.ka =lunaryorn=.
+
+Github: https://github.com/flycheck/flycheck
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'php-mode-hook 'flycheck-mode)
+(add-hook 'sh-mode-hook 'flycheck-mode)
+(add-hook 'json-mode-hook 'flycheck-mode)
+(add-hook 'nxml-mode-hook 'flycheck-mode)
+(add-hook 'python-mode-hook 'flycheck-mode)
+(add-hook 'emacs-lisp-mode-hook 'flycheck-mode)
+(add-hook 'lisp-interaction-mode-hook 'flycheck-mode)
+(setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)) ;disable the annoying doc checker
+(setq flycheck-indication-mode 'left-fringe)
+#+END_SRC
+
+The modes where flycheck should be enabled.
+
+**** iedit
+
+#+BEGIN_SRC emacs-lisp
+(require 'iedit)
+(setq iedit-unmatched-lines-invisible-default t)
+#+END_SRC
+*** Clojure
+**** cider
+
+#+BEGIN_QUOTE
+CIDER is Clojure IDE and REPL for Emacs, built on top of nREPL, the Clojure networked REPL server. It's a great alternative to the now deprecated combination of SLIME + swank-clojure.
+#+END_QUOTE
+
+It was formerly called =nrepl.el= and is written by Bozhidar Batsov.
+
+Github: https://github.com/clojure-emacs/cider
+
+#+BEGIN_SRC emacs-lisp
+(setq cider-popup-stacktraces nil)
+#+END_SRC
+**** nrepl-eval-sexp-fu
 
 Flashes the evaluated expression (visual feedback)
 
@@ -2018,8 +1896,37 @@ Flashes the evaluated expression (visual feedback)
 (require 'nrepl-eval-sexp-fu)
 (setq nrepl-eval-sexp-fu-flash-duration 0.4)
 #+END_SRC
+*** Common LISP
+**** slime
 
-*** org-mode
+#+BEGIN_QUOTE
+SLIME, the Superior Lisp Interaction Mode for Emacs, is an Emacs mode for developing Common Lisp applications.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(when (file-exists-p "~/quicklisp/slime-helper.el") (load "~/quicklisp/slime-helper.el"))
+#+END_SRC
+*** TeX/LaTeX
+**** auctex-mode
+
+#+BEGIN_SRC emacs-lisp
+(setq TeX-PDF-mode t)
+(setq TeX-parse-self t)
+(setq TeX-auto-save t)
+(setq TeX-save-query nil)
+
+(add-hook 'doc-view-mode-hook 'auto-revert-mode)
+(add-hook 'TeX-mode-hook
+          '(lambda ()
+             (define-key TeX-mode-map (kbd "<C-f8>")
+               (lambda ()
+                 (interactive)
+                 (TeX-command-menu "LaTeX")))
+             )
+          )
+#+END_SRC
+*** Org mode
+**** org-mode
 
 #+BEGIN_QUOTE
 Org mode is for keeping notes, maintaining TODO lists, planning projects, and authoring documents with a fast and effective plain-text system.
@@ -2029,7 +1936,7 @@ Org mode is the most amazing tool for Emacs. Even this Emacs configuration is wr
 
 Homepage: http://orgmode.org/
 
-**** General settings
+***** General settings
 
 #+BEGIN_SRC emacs-lisp
 (require 'org)
@@ -2057,7 +1964,7 @@ Homepage: http://orgmode.org/
 (define-key org-mode-map (kbd "<M-S-return>") 'my-org-insert-todo-heading)
 #+END_SRC
 
-**** Agenda
+***** Agenda
 
 #+BEGIN_SRC emacs-lisp
 ;; create the file for the agendas if it doesn't exist
@@ -2107,7 +2014,7 @@ Homepage: http://orgmode.org/
 (setcdr (assq 'todo org-agenda-sorting-strategy) '(todo-state-up priority-down category-keep))
 #+END_SRC
 
-**** Templates
+***** Templates
 
 #+BEGIN_SRC emacs-lisp
 (setq org-capture-templates
@@ -2120,7 +2027,7 @@ Homepage: http://orgmode.org/
 (add-to-list 'org-structure-template-alist '("S" "#+BEGIN_SRC shell-script\n?\n#+END_SRC\n"))
 #+END_SRC
 
-**** Todo
+***** Todo
 
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords
@@ -2141,7 +2048,7 @@ Homepage: http://orgmode.org/
 (setq org-log-into-drawer t) ; don't clutter files with state logs
 #+END_SRC
 
-**** Clocking
+***** Clocking
 
 #+BEGIN_SRC emacs-lisp
 (setq org-clock-idle-time 15)
@@ -2152,7 +2059,7 @@ Homepage: http://orgmode.org/
 (setq org-clock-clocked-in-display 'both)
 #+END_SRC
 
-**** org-mode-blog
+***** org-mode-blog
 
 Load the project template for my blog
 
@@ -2164,7 +2071,7 @@ Load the project template for my blog
 
 Don't forget to set =org-mode-blog-publishing-directory= to the desired export location in =~/.user.el=.
 
-**** org-mobile-sync-mode
+***** org-mobile-sync-mode
 
 #+BEGIN_SRC emacs-lisp
 (when (boundp 'org-mobile-directory)
@@ -2174,7 +2081,7 @@ Don't forget to set =org-mode-blog-publishing-directory= to the desired export l
 
 Enable sync mode only if =org-mobile-directory= is set.
 
-**** LaTeX
+***** LaTeX
 
 #+BEGIN_SRC emacs-lisp
 (require 'ox-latex)
@@ -2187,150 +2094,122 @@ Enable sync mode only if =org-mobile-directory= is set.
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 #+END_SRC
-
-*** php-mode
-
-The well maintained version of PHP mode by Eric James Michael Ritz or =ejmr=
-
-Github: https://github.com/ejmr/php-mode
+**** conf-mode
 
 #+BEGIN_SRC emacs-lisp
-(require 'php-mode)
-(add-to-list 'auto-mode-alist '("\\.module\\'" . php-mode))
-(setq php-mode-coding-style "Symfony2")
-(setq php-template-compatibility nil)
-
-(let ((manual "/usr/share/doc/php-doc/html/"))
-  (when (file-readable-p manual)
-    (setq php-manual-path manual)))
-
-(defun setup-php-mode ()
-  (require 'tempo nil t) ;needed by php-documentor
-  (require 'php-documentor nil t)
-  (local-set-key (kbd "C-c p") 'php-documentor-dwim)
-  (require 'php-align nil t)
-  (php-align-setup)
-  (php-eldoc-enable))
-(add-hook 'php-mode-hook 'setup-php-mode)
+(add-to-list 'auto-mode-alist '("\\.tks\\'" . org-mode))
 #+END_SRC
 
-Adding some goodies like =php-documentor= to add docstrings and =php-align= to align on =\==.
+**** deft
+#+BEGIN_SRC emacs-lisp
+(setq
+ deft-extension "org"
+ deft-directory "~/deft"
+ deft-text-mode 'org-mode
+ deft-use-filename-as-title t
+ deft-auto-save-interval 20
+ )
+#+END_SRC
+*** Emacs LISP
+**** eval-sexp-fu
+
+Flash some lights when evaluating expressions.
 
 #+BEGIN_SRC emacs-lisp
-(defun var_dump-die ()
-  (interactive)
-  (let ((expression (if (region-active-p)
-                        (buffer-substring (region-beginning) (region-end))
-                      (sexp-at-point)))
-        (line (thing-at-point 'line))
-        (pre "die(var_dump(")
-        (post "));")
-        )
-    (if expression
-        (progn
-          (beginning-of-line)
-          (if (string-match "return" line)
-              (progn
-                (newline)
-                (previous-line))
-            (next-line)
-            (newline)
-            (previous-line)
-            )
-          (insert pre)
-          (insert (format "%s" expression))
-          (insert post))
-      ()
-      (insert pre)
-      (insert post)
-      (backward-char (length post))
-      )))
-
-(defun var_dump ()
-  (interactive)
-  (if (region-active-p)
-    (progn
-      (goto-char (region-end))
-      (insert ");")
-      (goto-char (region-beginning))
-      (insert "var_dump("))
-    (insert "var_dump();")
-    (backward-char 3)
-    ))
+(require 'eval-sexp-fu)
+(setq eval-sexp-fu-flash-duration 0.4)
+(turn-on-eval-sexp-fu-flash-mode)
+(key-chord-define lisp-interaction-mode-map "90" 'eval-sexp-fu-eval-sexp-inner-list)
+(key-chord-define emacs-lisp-mode-map "90" 'eval-sexp-fu-eval-sexp-inner-list)
+(define-key lisp-interaction-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
+(define-key lisp-interaction-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
+(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-sexp-fu-eval-sexp-inner-list)
+(define-key emacs-lisp-mode-map (kbd "C-c C-e") 'eval-sexp-fu-eval-sexp-inner-sexp)
 #+END_SRC
+**** ielm
 
-Two functions to insert =var_dump...= quickly.
-
-*** prog-mode
+IELM is short for Inferior Emacs Lisp Mode. It is a REPL for Emacs Lisp that is sometimes useful if you want to get immediate feedback and a prompt to work with. I tend to use the =*scratch*= buffer for explorations like that usually but would be probably better off to use IELM more often :)
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
+(eval-after-load 'ielm
+  '(progn
+     (add-hook 'inferior-emacs-lisp-mode-hook
+               (lambda ()
+                 (turn-on-eldoc-mode)))))
 #+END_SRC
 
-Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
+We need to tweak IELM a bit so we get completion and eldoc hints.
+*** Python
+**** elpy
 
-*** projectile
+Elpy makes setting up a great Python IDE a breeze. It's written by [[http://www.jorgenschaefer.de/][Jorgen Schäfer]] also known as =forcer=.
 
-#+BEGIN_QUOTE
-Projectile is a project interaction library for Emacs. Its goal is to provide a nice set of features operating on a project level without introducing external dependencies(when feasible). For instance - finding project files has a portable implementation written in pure Emacs Lisp without the use of GNU find(but for performance sake an indexing mechanism backed by external commands exists as well).
-#+END_QUOTE
-
-Projectile is written by Bozhidar Batsov.
-
-Github: https://github.com/bbatsov/projectile
+Github: https://github.com/jorgenschaefer/elpy
 
 #+BEGIN_SRC emacs-lisp
-(require 'projectile nil t)
-(setq projectile-completion-system 'grizzl)
+;; Support for pyenv
+(defvar pyenv-path "~/.pyenv"
+  "pyenv root directory.")
+
+(when (file-exists-p pyenv-path)
+  (let ((bin-path (concat pyenv-path "/bin"))
+        (shims-path (concat pyenv-path "/shims")))
+    (setenv "PATH"
+            (concat bin-path ":" shims-path ":"
+                    (getenv "PATH")))
+    (setq python-check-command (concat shims-path "/flake8"))
+    (setq elpy-rpc-python-command (concat shims-path "/python"))))
+
+(elpy-enable)
+(delq 'flymake-mode elpy-default-minor-modes)
+
+(elpy-use-ipython)
 #+END_SRC
 
-*** rainbow-mode
-
-#+BEGIN_QUOTE
-rainbow-mode is a minor mode for Emacs which displays strings representing colors with the color they represent as background.
-#+END_QUOTE
-
-Homepage: http://julien.danjou.info/projects/emacs-packages#rainbow-mode
+I'm using =flycheck= so please don't use =flymake= (which is old and bugly). Also RET should trigger completion for me and not a newline.
+*** Haskell
+**** haskell-mode
 
 #+BEGIN_SRC emacs-lisp
-(dolist (hook '(css-mode-hook
-                html-mode-hook
-                js-mode-hook
-                emacs-lisp-mode-hook
-                org-mode-hook
-                text-mode-hook
-                ))
-  (add-hook hook 'rainbow-mode)
-  )
+(require 'haskell-mode)
+(setq haskell-indent-thenelse 3)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 #+END_SRC
-
-*** robe
-
-Advanced autocompletion for Ruby
+*** Javascript
+**** js2-mode
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'ruby-mode-hook
-          (lambda ()
-            (robe-mode 1)
-            (push 'company-robe company-backends)))
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+
+(setq js2-allow-rhino-new-expr-initializer nil)
+(setq js2-auto-indent-p nil)
+(setq js2-enter-indents-newline nil)
+(setq js2-global-externs '("module" "require" "buster" "sinon" "assert" "refute" "setTimeout" "clearTimeout" "setInterval" "clearInterval" "location" "__dirname" "console" "JSON"))
+(setq js2-idle-timer-delay 0.1)
+(setq js2-indent-on-enter-key nil)
+(setq js2-mirror-mode nil)
+(setq js2-strict-inconsistent-return-warning nil)
+(setq js2-auto-indent-p t)
+(setq js2-include-rhino-externs nil)
+(setq js2-include-gears-externs nil)
+(setq js2-concat-multiline-strings 'eol)
+(setq js2-rebind-eol-bol-keys nil)
+(setq js2-mode-show-parse-errors nil)
+(setq js2-mode-show-strict-warnings nil)
+
+(add-hook 'js2-mode-hook (lambda () (flycheck-mode 1)))
 #+END_SRC
 
-*** seqential-command
-
-Do different things on repeated keypresses.
+Got most of that from [[https://github.com/magnars/.emacs.d/blob/master/setup-js2-mode.el][Magnars' .emacs.d]].
+**** json-mode
 
 #+BEGIN_SRC emacs-lisp
-(require 'sequential-command)
-(define-sequential-command my-beg back-to-indentation beginning-of-line)
-(global-set-key "\C-a" 'my-beg)
-(define-sequential-command my-end end-of-line forward-to-indentation)
-(global-set-key "\C-e" 'my-end)
+(add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
 #+END_SRC
 
-Pressing =C-a= once goes back to the indentation, pressing it twice goes the beginning of the line.
-Pressing =C-e= once goes back to the end of the line, pressing it twice advances to the next line's indentation.
-
-*** skewer
+=json-mode= adds a bit better syntax highlighting for =.json= files.
+**** skewer
 
 #+BEGIN_QUOTE
 Provides live interaction with JavaScript, CSS, and HTML in a web browser. Expressions are sent on-the-fly from an editing buffer to be evaluated in the browser, just like Emacs does with an inferior Lisp process in Lisp modes.
@@ -2352,49 +2231,28 @@ Instructions and the source code can be found [[https://github.com/skeeto/skewer
 #+BEGIN_SRC emacs-lisp
 (skewer-setup)
 #+END_SRC
-
-*** COMMENT smart-mode-line
-
-#+BEGIN_QUOTE
-Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from small to large monitors by using a prefix feature and smart truncation.
-#+END_QUOTE
-
-It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortcomings and =sml= does a good job at improving it.
+*** Markdown
 
 #+BEGIN_SRC emacs-lisp
-(setq sml/vc-mode-show-backend t)
-(sml/setup)
-;;(sml/apply-theme 'dark)
-;;(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
-;;(set-face-attribute 'sml/folder nil :foreground "#f09fff")
-;;(set-face-attribute 'sml/filename nil :foreground "#f6df92")
-;;(set-face-attribute 'sml/vc-edited nil :foreground "#ff5f87")
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 #+END_SRC
 
-Show the encoding and add VC information to the mode-line. Respect the theme-colors and customize some of the =sml= colors.
+Enable markdown-mode when the file suffixes match.
 
-*** smartparens
+*** Ruby
+**** robe
 
-#+BEGIN_QUOTE
-Smartparens is minor mode for Emacs that deals with parens pairs and tries to be smart about it. It started as a unification effort to combine functionality of several existing packages in a single, compatible and extensible way to deal with parentheses, delimiters, tags and the like.
-#+END_QUOTE
-
-Written by Fuco and not used as it probably could be by myself. I really should spend some time to learn more about it :)
-
-Github: https://github.com/Fuco1/smartparens
+Advanced autocompletion for Ruby
 
 #+BEGIN_SRC emacs-lisp
-(require 'smartparens-config)
-(smartparens-global-mode t)
-(define-key sp-keymap (kbd "C-{") 'sp-select-previous-thing)
-(define-key sp-keymap (kbd "C-}") 'sp-select-next-thing)
-(define-key sp-keymap (kbd "C-\\") 'sp-select-previous-thing-exchange)
-(define-key sp-keymap (kbd "C-]") 'sp-select-next-thing-exchange)
-;; "fix"" highlight issue in scratch buffer
-(custom-set-faces '(sp-pair-overlay-face ((t ()))))
+(add-hook 'ruby-mode-hook
+          (lambda ()
+            (robe-mode 1)
+            (push 'company-robe company-backends)))
 #+END_SRC
-
-*** sgml
+*** HTML+js
+**** sgml
 
 #+BEGIN_SRC emacs-lisp
 (setq sgml-basic-offset 4)
@@ -2402,30 +2260,7 @@ Github: https://github.com/Fuco1/smartparens
 #+END_SRC
 
 Use 4 spaces for identation and enable =sgml-electric-tag-pair-mode= so that  editing an opening markup tag automatically updates the closing tag.
-
-*** slime
-
-#+BEGIN_QUOTE
-SLIME, the Superior Lisp Interaction Mode for Emacs, is an Emacs mode for developing Common Lisp applications.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-(when (file-exists-p "~/quicklisp/slime-helper.el") (load "~/quicklisp/slime-helper.el"))
-#+END_SRC
-
-*** vlf
-#+BEGIN_QUOTE
-Emacs minor mode that allows viewing, editing, searching and comparing large files in batches. Batch size can be adjusted on the fly and bounds the memory that is to be used for operations on the file. This way multiple large files can be instantly and simultaneously accessed without swapping and degraded performance.
-#+END_QUOTE
-
-Github: https://github.com/m00natic/vlfi
-
-#+BEGIN_SRC emacs-lisp
-(setq vlf-application 'dont-ask)        ; just do it
-(setq vlf-batch-size 8192)              ; a bit more text per batch please
-(require 'vlf-integrate)                ; just do it for real
-#+END_SRC
-*** web-mode
+**** web-mode
 #+BEGIN_QUOTE
 web-mode.el is an autonomous emacs major-mode for editing web templates:
 HTML documents embedding parts (CSS / JavaScript) and blocks (client/server side)
@@ -2442,19 +2277,6 @@ Github: https://github.com/fxbois/web-mode
 #+END_SRC
 
 Enable web-mode for html buffers. Disable font-locking in web-mode because it's conflicting with other modes that do font-locking.
-
-
-** Disabled modes - those I'm not yet sure about
-*** auto-dim-other-buffers
-#+BEGIN_QUOTE
-Visually makes non-current buffers less prominent. Currently disabled, but original author liked it.
-#+END_QUOTE
-
-Github: https://github.com/mina86/auto-dim-other-buffers.el
-
-#+BEGIN_SRC emacs-lisp
-(auto-dim-other-buffers-mode -1)
-#+END_SRC
 
 ** Evil - make an Emacs into a better VIM
 

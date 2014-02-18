@@ -600,12 +600,15 @@ We need to turn the mode on here so that we can map keys further below. We lower
 #+BEGIN_SRC emacs-lisp :var keys=keys :results output :tangle no :exports none :colnames nil
 (mapcar (lambda (l)
           (let* ((key (car l))
-                 (def (if (string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
-                          (format "key-chord-define-global \"%s\"" key)
-                        (format "global-set-key (kbd \"%s\")" key)))
+                 (def
+                  (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
+                         (format "key-chord-define-global \"%s\"" key))
+                        (t
+                         (format "global-set-key (kbd \"%s\")" key)))
+                  )
                  (command (car (last l))))
-                 (princ (format "(%s %s)\n" def command))))
-          keys)
+            (princ (format "(%s %s)\n" def command))))
+        keys)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :results silent

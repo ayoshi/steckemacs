@@ -210,6 +210,7 @@ The following will do some interface changes, and will fix some annoying quirks
  vc-follow-symlinks t                   ;follow symlinks automatically
  eval-expression-print-length nil       ;do not truncate printed expressions
  eval-expression-print-level nil        ;print nested expressions
+ truncate-lines nil;,
  kill-ring-max 5000                     ;truncate kill ring after 5000 entries
  mark-ring-max 5000                     ;truncate mark ring after 5000 entries
  mouse-autoselect-window -.1            ;window focus follows the mouse pointer
@@ -233,6 +234,7 @@ These have to be set as defaults.
  c-basic-offset 4                       ;"tab" with in c-related modes
  c-hungry-delete-key t                  ;delete more than one space
  require-final-newline t          ;auto add newline at the end of file
+ show-trailing-whitespace nil
  fill-column 72)
 #+END_SRC
 
@@ -806,7 +808,7 @@ I prefer hickey theme from sublime-themes packages
 https://raw.github.com/owainlewis/emacs-color-themes/master/previews/hickey.png
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'hickey t)
+(load-theme 'solarized-light t)
 #+END_SRC
 
 Select the first available font in order of preference
@@ -830,19 +832,6 @@ Put that line into =~/.user.el= which is loaded [[*User%20Settings][in this init
 #+END_SRC
 
 For the frame title either show a file or a buffer name (if the buffer isn't visiting a file).
-
-#+BEGIN_SRC emacs-lisp
-(custom-set-variables
- '(ansi-color-names-vector
-   [("black" . "#8a8888")
-    ("#EF3460" . "#F25A7D")
-    ("#BDEF34" . "#DCF692")
-    ("#EFC334" . "#F6DF92")
-    ("#34BDEF" . "#92AAF6")
-    ("#B300FF" . "#DF92F6")
-    ("#3DD8FF" . "#5AF2CE")
-    ("#FFFFFF" . "#FFFFFF")]))
-#+END_SRC
 
 *** Post-theme tweaks
 Some themes don't cover faces for the plugins I use. Here I tweak them
@@ -1479,7 +1468,7 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*Backtrace*" :height 30)
         ("*Messages*" :height 30)
         ("*Occur*" :noselect t)
-        ("*Ibuffer*" :noselect t :stick t)
+        ("*Ibuff\\*" :regexp t :noselect t :stick t)
         ("*Ido Completions*" :noselect t :height 30)
         ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
         ("*magit-diff*" :noselect t :height 40 :width 80)
@@ -1597,7 +1586,7 @@ It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortc
 #+BEGIN_SRC emacs-lisp
 (setq sml/vc-mode-show-backend t)
 (sml/setup)
-;;(sml/apply-theme 'dark)
+(sml/apply-theme 'nil) ;; Use theme specified settings
 ;;(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
 ;;(set-face-attribute 'sml/folder nil :foreground "#f09fff")
 ;;(set-face-attribute 'sml/filename nil :foreground "#f6df92")
@@ -1700,14 +1689,14 @@ I'd like to have the terminal respect the default keys of the shell as much as p
 
 TODO: Add region expand
 TODO: Add multiple cursor
-*** Programming modes independant of languages
+*** Programming modes independent of languages
 
 Like project management tools, parens management/coloring, completion frameworks, flycheck
 
 **** prog-mode
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
+(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace t)))
 #+END_SRC
 
 Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
@@ -1855,15 +1844,9 @@ Flycheck is written by [[http://lunaryorn.com/][Sebastian Wiesner]] a.ka =lunary
 Github: https://github.com/flycheck/flycheck
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'php-mode-hook 'flycheck-mode)
-(add-hook 'sh-mode-hook 'flycheck-mode)
-(add-hook 'json-mode-hook 'flycheck-mode)
-(add-hook 'nxml-mode-hook 'flycheck-mode)
-(add-hook 'python-mode-hook 'flycheck-mode)
-(add-hook 'emacs-lisp-mode-hook 'flycheck-mode)
-(add-hook 'lisp-interaction-mode-hook 'flycheck-mode)
+(global-flycheck-mode t) ;; Flycheck is smart not to be annoying, and works were it's supported
 (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)) ;disable the annoying doc checker
-(setq flycheck-indication-mode 'left-fringe)
+(setq flycheck-indication-mode nil) ;Highlighting in line is enough for me
 #+END_SRC
 
 The modes where flycheck should be enabled.

@@ -635,6 +635,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-x a s           | General   | Toggle auto saving of buffers                             | 'auto-save-buffers-enhanced-toggle-activity                 |
 | C-c d             | General   | Change dictionary                                         | 'ispell-change-dictionary                                   |
 | C-c C-f           | General   | Toggle flyspell mode (spellchecking)                      | 'flyspell-mode                                              |
+| C-S-p             | General   | Sublime-like command palette (execute command)            | 'sublime-csp                                                |
 | M-x               | General   | Smex (execute command)                                    | 'smex                                                       |
 | M-X               | General   | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
 | C-h C-h           | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
@@ -1144,9 +1145,17 @@ This package maintains a menu for visiting files that were operated on recently.
   (defun recentf-ido-find-file ()
     "Find a recent file using Ido."
     (interactive)
-    (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+    (let ((file (ido-completing-read "Recent files: " recentf-list nil t)))
       (when file
         (find-file file))))
+
+  (defun recentf-grizzl-find-file ()
+    "Find a recent file using Grizzl."
+    (interactive)
+    (let ((file (completing-read "Recent files: " recentf-list nil t)))
+      (when file
+        (find-file file))))
+
 
   (defsubst file-was-visible-p (file)
     "Return non-nil if FILE's buffer exists and has been displayed."
@@ -1725,10 +1734,41 @@ Grizzl is a small utility library to be used in other Elisp code needing fuzzy s
 
 The source code for Grizzl can be found on [[https://github.com/d11wtq/grizzl][Github]]. It is written by Chris Corbyn who also wrote the PHP REPL =Boris=.
 
+Grizzl is pretty cool, we can use it for more things.
 Currently it is used by [[https://github.com/bbatsov/projectile][Projectile]] in my config. I quite like Grizzl. It offers some benefits for when entries are longer. For most cases =IDO= is better suited though.
 
 #+BEGIN_SRC emacs-lisp
 (setq *grizzl-read-max-results* 30)
+#+END_SRC
+
+This is a wrapper around completing-read - to us it grizzl for more things
+
+#+BEGIN_SRC emacs-lisp
+(defun to-string (object)
+  "Convert OBJECT to a string."
+  (cond
+   ((symbolp object) (symbol-name object))
+   ((stringp object) object)
+   ((numberp object) (number-to-string object))
+   (t (prin1-to-string object))))
+
+(defadvice completing-read (around grizzl-advise-completing-read activate)
+  "Wrapper that uss grizzl"
+  (let* ((completions (mapcar 'to-string
+                              (all-completions "" collection predicate)))
+         (search-index (grizzl-make-index completions)))
+    (if search-index
+        (setq ad-return-value
+              (grizzl-completing-read prompt search-index))
+      ad-do-it)))
+
+(progn
+  (ad-disable-advice 'completing-read 'around 'grizzl-advise-completing-read)
+  (ad-activate 'completing-read))
+
+(progn
+  (ad-enable-advice 'completing-read 'around 'grizzl-advise-completing-read)
+  (ad-activate 'completing-read))
 #+END_SRC
 
 I would like to see more than just the default results of 10.
@@ -2415,7 +2455,9 @@ TODO move evil bindings to separate table
 (evil-leader/set-key "lb" 'ido-switch-buffer)
 (evil-leader/set-key "lB" 'ibuffer)
 (evil-leader/set-key "lf" 'ido-find-file)
-(evil-leader/set-key "lr" 'recentf-ido-find-file)
+;; For recent file grizzl seems like better choice
+;; But IDO function is also available
+(evil-leader/set-key "lr" 'recentf-grizzl-find-file)
 
 ;; simulate vim's "nnoremap <space> 10jzz"
 (define-key evil-normal-state-map " " (lambda ()
@@ -2453,6 +2495,23 @@ TODO move evil bindings to separate table
 (define-key evil-normal-state-map (kbd "?") 'dash-at-point)
 #+END_SRC
 
+** Sublime and other friends
+
+Collection of things that I liked from other editors.
+
+*** Shift-Cmd-P from Sublime ( command palette )
+
+Can be emulated by grizzlr
+
+#+begin_src emacs-lisp
+(defun sublime-csp ()
+  (interactive)
+  (call-interactively
+   (intern
+    (completing-read
+     "C-S-p"
+     (all-completions "" obarray 'commandp)))))
+#+end_src
 
 ** Load minor mode with all the keybindings we've set
 

@@ -84,6 +84,15 @@ This table is generated with an Elisp block =keys-doc= from an Org table which i
 
 Before we install any package - we need to clean up a bit, set up some sane defaults, and remove small annoyances. All the settings below do not require any additional package.
 
+*** System
+
+This will help modes like flx and grizzl work faster on modern machine. Will set emacs garbage collection treshold to 20MB.
+[[http://github.com/lewang/flx#gc-optimization][From flx README]]
+
+#+begin_src emacs-lisp
+(setq gc-cons-threshold 20000000)
+#+end_src
+
 *** Directories
 
 Set up special directories first

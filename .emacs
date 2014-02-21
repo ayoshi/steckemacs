@@ -39,6 +39,9 @@
 
 ;;; Code:
 ;;(setq ns-use-srgb-colorspace t)
+;; Trace on erros
+;;(setq debug-on-error t)
+
 (require 'cl)
 (require 'org)
 (package-initialize)

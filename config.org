@@ -236,6 +236,11 @@ The following will do some interface changes, and will fix some annoying quirks
 These have to be set as defaults.
 
 #+begin_src emacs-lisp
+(global-font-lock-mode t)
+
+;; Always indent on newline. This setting is affect Evil Insert mode too
+(global-set-key (kbd "RET") 'newline-and-indent)
+
 (setq-default
  default-major-mode 'text-mode    ;use text mode per default
  tab-width 4
@@ -245,7 +250,8 @@ These have to be set as defaults.
  require-final-newline t          ;auto add newline at the end of file
  show-paren-mode t  ; always show matching parens
  show-trailing-whitespace nil
- fill-column 72
+ indicate-empty-lines nil
+ fill-column 7
  )
 #+end_src
 
@@ -649,6 +655,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-S-p             | General   | Sublime-like command palette (execute command)            | 'sublime-csp                                                |
 | M-x               | General   | Smex (execute command)                                    | 'smex                                                       |
 | M-X               | General   | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
+| M-X               | General   | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
 | C-h C-h           | General   | Helm M-x (execute command)                                | 'helm-M-x                                                   |
 | C-h h             | General   | Helm navigate project files                               | 'helm-projectile                                            |
 | <C-S-iso-lefttab> | General   | Helm for files                                            | 'helm-for-files                                             |
@@ -682,8 +689,7 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-c w             | Editing   | Cleanup whitespaces                                       | 'whitespace-cleanup                                         |
 | C-h C-v           | Editing   | Toggle visual line mode                                   | 'visual-line-mode                                           |
 | C-h TAB           | Editing   | Indent the whole buffer                                   | 'my-indent-whole-buffer                                     |
-| S-SPC             | Editing   | Expand Region                                             | 'expand-region                                              |
-| S-s-SPC           | Editing   | Expand Region                                             | 'expand-region                                              |
+| C-=               | Editing   | Expand Region                                             | 'er/expand-region                                           |
 | C-?               | Source    | Go to definition of function or variable at point         | 'my-find-function-or-variable-at-point                      |
 | C-h C-f           | Source    | Go to the definition of the function under cursor         | 'find-function-at-point                                     |
 | M-5               | Source    | Helm select etags                                         | 'helm-etags-select                                          |
@@ -1709,17 +1715,55 @@ I'd like to have the terminal respect the default keys of the shell as much as p
 
 TODO: Add region expand
 TODO: Add multiple cursor
+**** multiple-cursors
+
+#+begin_quote
+When you have an active region that spans multiple lines, the following will add a cursor to each line:
+
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+
+When you want to add multiple cursors not based on continuous lines, but based on keywords in the buffer, use:
+
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
+First mark the word, then add more cursors.
+#+end_quote
+
+#+begin_src emacs-lisp
+(require 'multiple-cursors)
+#+end_src
+
+**** expand-region
+
+#+begin_src emacs-lisp
+(require 'expand-region)
+#+end_src
+
 *** Programming modes independent of languages
 
 Like project management tools, parens management/coloring, completion frameworks, flycheck
 
 **** prog-mode
 
+Some defaults specific to programming modes
+
+I hate visible whitespaces. They get cleaned out on save anyway, so what's the point of annoying me visually?
+
 #+begin_src emacs-lisp
-(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace t)))
+(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace nil)))
 #+end_src
 
 Show whitespace errors in all programming modes by turning on =show-trailing-whitespace= in these modes.
+
+**** lisp-mode-shared-map
+
+In all LISPS reindent with new line does wonders to readability
+
+#+begin_src emacs-lisp :tangle yes
+(define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
+#+end_src
 
 **** highlight-symbol
 
@@ -2352,6 +2396,9 @@ Enable web-mode for html buffers. Disable font-locking in web-mode because it's 
 
 ;;Escape should quit whatever it can
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; This will make Enter properly indent when needed
+(define-key evil-insert-state-map [remap newline] 'evil-ret)
 
 #+end_src
 

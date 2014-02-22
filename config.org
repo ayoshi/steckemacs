@@ -439,6 +439,10 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         ;;       :type github
         ;;       :features evil-plugins
         ;;       :pkgname "tarao/evil-plugins")
+        (:name replace-colorthemes
+               :type github
+               :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/replace-colorthemes")
+               :pkgname "emacs-jp/replace-colorthemes")
         (:name php-documentor
                :type http
                :url "https://raw.github.com/wenbinye/dot-emacs/master/site-lisp/contrib/php-documentor.el")
@@ -602,7 +606,7 @@ This is a custom keymap. It is used for a [[my-keys-minor-mode][minor mode that 
 
 #+begin_src emacs-lisp
 (key-chord-mode 1)
-(setq key-chord-two-keys-delay 0.03)
+(setq key-chord-two-keys-delay 0.05)
 #+end_src
 
 #+BEGIN_QUOTE
@@ -1497,6 +1501,7 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*Backtrace*" :height 30)
         ("*Messages*" :height 30)
         ("*Occur*" :noselect t)
+        ("*undo-tree*" :noselect t)
         ("*Ibuff\\*" :regexp t :noselect t :stick t)
         ("*Ido Completions*" :noselect t :height 30)
         ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
@@ -2364,7 +2369,6 @@ Github: https://github.com/fxbois/web-mode
 Enable web-mode for html buffers. Disable font-locking in web-mode because it's conflicting with other modes that do font-locking.
 
 ** Evil - make an Emacs into a better VIM
-
 *** Basics:
 
 #+begin_src emacs-lisp

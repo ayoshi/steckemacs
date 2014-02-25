@@ -483,6 +483,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         auto-compile
         evil
         surround
+        ert-modeline
         evil-indent-textobject
         evil-leader
         evil-nerd-commenter
@@ -548,12 +549,12 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         ;;yphp-eldoc
         php-mode
         popup
-	    popwin
+        popwin
         projectile
         pretty-symbols
         pos-tip
         rainbow-mode
-        ;;rainbow-delimiters-mode
+        rainbow-delimiters
         robe
         restclient
         sequential-command
@@ -1746,6 +1747,14 @@ First mark the word, then add more cursors.
 (require 'expand-region)
 #+end_src
 
+**** rainbow-delimiters
+
+I generally like rainbow-delimiters mode.
+
+#+begin_src emacs-lisp :tangle yes
+(global-rainbow-delimiters-mode)
+#+end_src
+
 *** Programming modes independent of languages
 
 Like project management tools, parens management/coloring, completion frameworks, flycheck
@@ -2254,6 +2263,16 @@ IELM is short for Inferior Emacs Lisp Mode. It is a REPL for Emacs Lisp that is 
 #+end_src
 
 We need to tweak IELM a bit so we get completion and eldoc hints.
+
+**** ert-modline
+
+This is a minor mode that will run ERT tests in the background whenever you save an Elisp buffer or evaluate an expression. The results are displayed in the modeline, so you will know immediately if you have introduced a breaking change.
+
+#+begin_src emacs-lisp :tangle yes
+(autoload 'ert-modeline-mode "ert-modeline")
+(add-hook 'emacs-lisp-mode-hook 'ert-modeline-mode)
+#+end_src
+
 *** Python
 **** elpy
 
@@ -2265,6 +2284,8 @@ Github: https://github.com/jorgenschaefer/elpy
 ;; Support for pyenv
 (defvar pyenv-path "~/.pyenv"
   "pyenv root directory.")
+
+(setq elpy-rpc-backend "jedi")
 
 (when (file-exists-p pyenv-path)
   (let ((bin-path (concat pyenv-path "/bin"))

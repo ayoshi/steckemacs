@@ -68,8 +68,7 @@ I only describe my custom key combinations currently. To learn the standard Emac
                               (setq category (nth 1 l))
                               (princ (format "*** %s\n" category))
                               (princ "#+ATTR_HTML: :rules all :cellpadding 4\n")
-                              (princ "| / | <r> | | \n")
-                              )
+                              (princ "| / | <r> | | \n"))
                             (princ (format "| # | =%s= | %s |\n" (car l) (nth 2 l))))
                         (princ "|-\n")))
           keys))
@@ -199,7 +198,8 @@ First - let's clean up some visual clutter
 
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+;; Menu bar is not really a hindrance in Mac GUI mode
+;; (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 #+end_src
 
 The only way to disable both audio and visual bells.
@@ -2642,7 +2642,7 @@ This could help to quickly change something locally, or per host
 
 #+begin_src emacs-lisp
 (when (file-readable-p "~/.user.el") (load "~/.user.el"))
-(when (file-readable-p "~/.user.el") (load "~/.local.el"))
+(when (file-readable-p "~/.local.el") (load "~/.local.el"))
 #+end_src
 
 

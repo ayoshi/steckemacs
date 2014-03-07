@@ -101,7 +101,7 @@ Set up special directories first
      conf-etc-dir      (file-name-as-directory (concat conf-root-dir "etc"))
      conf-pscratch-dir (file-name-as-directory (concat conf-tmp-dir  "pscratch"))
      conf-lib-dir      (file-name-as-directory (concat conf-root-dir "lib"))
-     conf-autosaves-dir(file-name-as-directory (concat conf-tmp-dir  "autosaves"))
+     conf-autosaves-dir (file-name-as-directory (concat conf-tmp-dir  "autosaves"))
      conf-backups-dir  (file-name-as-directory (concat conf-tmp-dir  "backups"))
      conf-custom-dir   (file-name-as-directory (concat conf-etc-dir  "custom")))
 
@@ -236,7 +236,7 @@ These have to be set as defaults.
 #+begin_src emacs-lisp
 (global-font-lock-mode t)
 
-;; Always indent on newline. This setting is affect Evil Insert mode too
+;; Always indent on a newline. This setting affects Evil Insert mode too
 (global-set-key (kbd "RET") 'newline-and-indent)
 
 (setq-default
@@ -1500,6 +1500,7 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*Occur*" :noselect t)
         ("*undo-tree*" :noselect t)
         ("*Ibuff\\*" :regexp t :noselect t :stick t)
+        ("*Org\\*" :regexp t :noselect t)
         ("*Ido Completions*" :noselect t :height 30)
         ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
         ("*magit-diff*" :noselect t :height 40 :width 80)

@@ -18,9 +18,7 @@
 The second goal is to keep everything in one file =config.org= (plus =.emacs= for the initialization) and not as many others to split it over lots of files and directories. Packages are retrieved from the Emacs package repositories on the internet on the first startup.
 
 The source code is hosted on Github: [[https://github.com/ayoshi/steckemacs]]
-The original steckemacs source code is hosted  here:The original steckemacs source code is hosted  here: [[https://github.com/steckerhalter/steckemacs]]
- [[https://github.com/steckerhalter/steckemacs]]
-
+The original steckemacs source code is hosted  here: [[https://github.com/steckerhalter/steckemacs]]
 
 ** Installation
 
@@ -870,8 +868,6 @@ This will reset it to the default background
   (set-face-background 'git-gutter:unchanged nil))
 #+end_src
 
-For some reason this didn't work with =setq= so I had to use =custom-set-variables=. It changes ansi colors for comint mode, e.g. shell-mode
-
 ** Custom Functions
 *** my-url-insert-file-contents
 
@@ -1616,9 +1612,9 @@ Smart Mode Line is a sexy mode-line for Emacs, that aims to be easy to read from
 It is written by Artur Bruce-Connor. The default Emacs mode-line has some shortcomings and =sml= does a good job at improving it.
 
 #+begin_src emacs-lisp
-(setq sml/vc-mode-show-backend t)
-(sml/setup)
-(sml/apply-theme 'nil) ;; Use theme specified settings
+;; (setq sml/vc-mode-show-backend t)
+;; (sml/setup)
+;; (sml/apply-theme 'nil) ;; Use theme specified settings
 ;;(set-face-attribute 'sml/prefix nil :foreground "#dcf692")
 ;;(set-face-attribute 'sml/folder nil :foreground "#f09fff")
 ;;(set-face-attribute 'sml/filename nil :foreground "#f6df92")
@@ -2634,6 +2630,119 @@ Can be emulated by grizzlr
   "A minor mode so that my key settings override annoying major modes."
   t " K" 'my-keys-minor-mode-map)
 (my-keys-minor-mode 1)
+#+end_src
+
+** Post - init
+
+Here I put all the stuff which should be done after all major and minor modes are loaded.
+
+*** Modeline - some modeline clutter cleanup
+
+This is a clean-up of the modeline, the idea coming from [[http://amitp.blogspot.co.il/2011/08/emacs-custom-mode-line.html][Amit Patel's blog post]]
+Mainly, I liked his idea to remove all the clutter and make minor modes almost invisible. It requires VC mode to be loaded. The proper way to do that would be to factor it out to separate module
+
+#+begin_src emacs-lisp :tangle yes
+  ;; Extra mode line faces
+  (make-face 'mode-line-read-only-face)
+  (make-face 'mode-line-modified-face)
+  (make-face 'mode-line-folder-face)
+  (make-face 'mode-line-filename-face)
+  (make-face 'mode-line-position-face)
+  (make-face 'mode-line-mode-face)
+  (make-face 'mode-line-minor-mode-face)
+  (make-face 'mode-line-process-face)
+  (make-face 'mode-line-80col-face)
+
+  (set-face-attribute 'mode-line nil
+                      :inverse-video nil
+                      ;; :box '(:line-width 1 :style nil)
+                      )
+  (set-face-attribute 'mode-line-inactive nil
+                      :inverse-video nil
+                      ;; :box '(:line-width 1 :style nil)
+                      )
+  (set-face-attribute 'mode-line-read-only-face nil
+                      :inherit 'mode-line-face
+                      :foreground "#4271ae")
+  (set-face-attribute 'mode-line-modified-face nil
+                      :inherit 'mode-line-face
+                      :foreground "#c82829")
+  (set-face-attribute 'mode-line-folder-face nil
+                      :inherit 'mode-line-face)
+  (set-face-attribute 'mode-line-filename-face nil
+                      :inherit 'mode-line-face
+                      :weight 'bold)
+  (set-face-attribute 'mode-line-position-face nil
+                      :inherit 'mode-line-face
+                      :height 100)
+  (set-face-attribute 'mode-line-mode-face nil
+                      :inherit 'mode-line-face)
+  (set-face-attribute 'mode-line-minor-mode-face nil
+                      :inherit 'mode-line-mode-face
+                      :height 90)
+  (set-face-attribute 'mode-line-process-face nil
+                      :inherit 'mode-line-face)
+  (set-face-attribute 'mode-line-80col-face nil
+                      :inherit 'mode-line-position-face)
+
+  ;; Helper function
+  (defun shorten-directory (dir max-length)
+    "Show up to `max-length' characters of a directory name `dir'."
+    (let ((path (reverse (split-string (abbreviate-file-name dir) "/")))
+          (output ""))
+      (when (and path (equal "" (car path)))
+        (setq path (cdr path)))
+      (while (and path (< (length output) (- max-length 4)))
+        (setq output (concat (car path) "/" output))
+        (setq path (cdr path)))
+      (when path
+        (setq output (concat ".../" output)))
+      output))
+
+
+  ;; Mode line setup
+  (setq-default mode-line-format
+                '(; Position, including warning for 80 columns
+                  (:propertize "%4l:" face mode-line-position-face)
+                  (:eval (propertize "%3c" 'face
+                                     (if (>= (current-column) 80)
+                                         'mode-line-80col-face
+                                       'mode-line-position-face)))
+                                          ; emacsclient [default -- keep?]
+                  mode-line-client
+                  "  "
+                                          ; read-only or modified status
+                  (:eval
+                   (cond (buffer-read-only
+                          (propertize " RO " 'face 'mode-line-read-only-face))
+                         ((buffer-modified-p)
+                          (propertize " ** " 'face 'mode-line-modified-face))
+                         (t "      ")))
+                  "    "
+                                          ; directory and buffer/file name
+                  (:propertize (:eval (shorten-directory default-directory 30))
+                               face mode-line-folder-face)
+                  (:propertize "%b"
+                               face mode-line-filename-face)
+                                          ;; narrow [default -- keep?]
+                  " %n "
+                                          ;; mode indicators: vc, recursive edit, major mode, minor modes, process, global
+                  (vc-mode vc-mode)
+                  "  %["
+                  (:propertize mode-name
+                               face mode-line-mode-face)
+                  "%] "
+                  (:eval (propertize (format-mode-line minor-mode-alist)
+                                     'face 'mode-line-minor-mode-face))
+                  (:propertize mode-line-process
+                               face mode-line-process-face)
+                  (global-mode-string global-mode-string)
+                  "    "
+                   ;; nyan-mode uses nyan cat as an alternative to %p
+                  (:eval (when nyan-mode (list (nyan-create))))
+                  ))
+
+
 #+end_src
 
 ** Allow for user and host local configuration - they can override everything

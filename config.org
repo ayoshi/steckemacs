@@ -95,24 +95,28 @@ This will help modes like flx and grizzl work faster on modern machine. Will set
 Set up special directories first
 
 #+begin_src emacs-lisp
-    (setq
-     conf-root-dir     (file-name-as-directory (concat "~/.emacs.d"))
-     conf-tmp-dir      (file-name-as-directory (concat conf-root-dir "tmp"))
-     conf-etc-dir      (file-name-as-directory (concat conf-root-dir "etc"))
-     conf-pscratch-dir (file-name-as-directory (concat conf-tmp-dir  "pscratch"))
-     conf-lib-dir      (file-name-as-directory (concat conf-root-dir "lib"))
-     conf-autosaves-dir (file-name-as-directory (concat conf-tmp-dir  "autosaves"))
-     conf-backups-dir  (file-name-as-directory (concat conf-tmp-dir  "backups"))
-     conf-custom-dir   (file-name-as-directory (concat conf-etc-dir  "custom")))
+(setq
+ conf-root-dir     (file-name-as-directory (concat "~/.emacs.d"))
+ conf-tmp-dir      (file-name-as-directory (concat conf-root-dir "tmp"))
+ conf-etc-dir      (file-name-as-directory (concat conf-root-dir "etc"))
+ conf-pscratch-dir (file-name-as-directory (concat conf-tmp-dir  "pscratch"))
+ conf-lib-dir      (file-name-as-directory (concat conf-root-dir "lib"))
+ conf-autosaves-dir (file-name-as-directory (concat conf-tmp-dir  "autosaves"))
+ conf-backups-dir  (file-name-as-directory (concat conf-tmp-dir  "backups"))
+ conf-custom-dir   (file-name-as-directory (concat conf-etc-dir  "custom")))
 
-    ;; create tmp dirs if necessary
-    (make-directory conf-root-dir t)
-    (make-directory conf-etc-dir t)
-    (make-directory conf-tmp-dir t)
-    (make-directory conf-autosaves-dir t)
-    (make-directory conf-backups-dir t)
-    (make-directory conf-custom-dir t)
-    (make-directory conf-pscratch-dir t)
+(setq tramp-bkup-backup-directory-info
+      '((t conf-backups-dir ok-create full-path prepend-name)))
+
+;; create tmp dirs if necessary
+(make-directory conf-root-dir t)
+(make-directory conf-etc-dir t)
+(make-directory conf-tmp-dir t)
+(make-directory conf-autosaves-dir t)
+(make-directory conf-backups-dir t)
+(make-directory conf-custom-dir t)
+(make-directory conf-pscratch-dir t)
+
 #+end_src
 *** Default load path
 
@@ -2752,8 +2756,6 @@ Mainly, I liked his idea to remove all the clutter and make minor modes almost i
                                face mode-line-process-face)
                   (global-mode-string global-mode-string)
                   "    "
-                   ;; nyan-mode uses nyan cat as an alternative to %p
-                  (:eval (when nyan-mode (list (nyan-create))))
                   ))
 
 

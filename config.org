@@ -443,6 +443,13 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         ;;       :type github
         ;;       :features evil-plugins
         ;;       :pkgname "tarao/evil-plugins")
+        (:name powerline
+               :type github
+               :pkgname "milkypostman/powerline")
+        (:name emacs-soothe-theme
+               :type github
+               :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/emacs-soothe-theme")
+               :pkgname "milkypostman/emacs-soothe-theme")
         (:name replace-colorthemes
                :type github
                :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/replace-colorthemes")
@@ -535,6 +542,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         highlight-symbol
         htmlize
         iedit
+        ido-vertical-mode
         ibuffer-vc
         jinja2-mode
         js2-mode
@@ -888,6 +896,7 @@ This will reset it to the default background
 (when (require 'git-gutter nil 'noerror)
   (set-face-background 'git-gutter:unchanged nil))
 #+end_src
+
 
 ** Custom Functions
 *** my-url-insert-file-contents
@@ -1446,7 +1455,7 @@ Make a directory with =M-m=.
 
 Use =C-j= if you want to create a file with what you have entered (and not the match).
 
-I also prefer flx-ido mode - flex matching simply kicks ass
+I also prefer flx-ido mode - flex matching simply kicks ass and ido-vertical.
 
 Github: https://github.com/lewang/flx
 
@@ -1462,6 +1471,8 @@ Github: https://github.com/lewang/flx
       )
 (ido-mode 1)
 (flx-ido-mode 1)
+(ido-vertical-mode 1)
+(setq ido-vertical-define-keys 'C-n-C-p-up-down-left-right)
 (setq ido-use-faces nil)
 (icomplete-mode 1)
 
@@ -2582,10 +2593,11 @@ TODO move evil bindings to separate table
 ;; Leader lb - ido buffers lf - ido files
 (evil-leader/set-key "lb" 'ido-switch-buffer)
 (evil-leader/set-key "lB" 'ibuffer)
+
 (evil-leader/set-key "lf" 'ido-find-file)
 ;; For recent file grizzl seems like better choice
 ;; But IDO function is also available
-(evil-leader/set-key "lr" 'recentf-grizzl-find-file)
+(evil-leader/set-key "lr" 'recentf-ido-find-file)
 
 ;; simulate vim's "nnoremap <space> 10jzz"
 (define-key evil-normal-state-map " " (lambda ()

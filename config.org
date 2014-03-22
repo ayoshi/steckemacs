@@ -543,6 +543,8 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         htmlize
         iedit
         ido-vertical-mode
+        ido-ubiquitous
+        ido-hacks
         ibuffer-vc
         jinja2-mode
         js2-mode
@@ -1506,6 +1508,37 @@ I prefer the list of files to be sorted by mtime (like 'ls -ltr'), instead of al
               ido-temp-list))))
 #+end_src
 
+We can use IDO to complete anything. [[http://www.emacswiki.org/emacs/InteractivelyDoThings#toc15][From emacswiki]].
+
+#+begin_src emacs-lisp
+(defvar ido-enable-replace-completing-read t
+  "If t, use ido-completing-read instead of completing-read if possible.
+
+    Set it to nil using let in around-advice for functions where the
+    original completing-read is required.  For example, if a function
+    foo absolutely must use the original completing-read, define some
+    advice like this:
+
+    (defadvice foo (around original-completing-read-only activate)
+      (let (ido-enable-replace-completing-read) ad-do-it))")
+
+;; Replace completing-read wherever possible, unless directed otherwise
+(defadvice completing-read
+    (around use-ido-when-possible activate)
+  (if (or (not ido-enable-replace-completing-read) ; Manual override disable ido
+          (and (boundp 'ido-cur-list)
+               ido-cur-list)) ; Avoid infinite loop from ido calling this
+      ad-do-it
+    (let ((allcomp (all-completions "" collection predicate)))
+      (if allcomp
+          (setq ad-return-value
+                (ido-completing-read prompt
+                                     allcomp
+                                     nil require-match initial-input hist def))
+        ad-do-it))))
+#+end_src
+
+
 **** smex
 
 Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason that helm doesn't do flex matching
@@ -1836,9 +1869,9 @@ Currently it is used by [[https://github.com/bbatsov/projectile][Projectile]] in
 (setq *grizzl-read-max-results* 30)
 #+end_src
 
-This is a wrapper around completing-read - to us it grizzl for more things
+This is a wrapper around completing-read - to us it grizzl for more things. I disabled this code block for now, to play more with IDO-vertical
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun to-string (object)
   "Convert OBJECT to a string."
   (cond

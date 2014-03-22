@@ -240,6 +240,8 @@ These have to be set as defaults.
 #+begin_src emacs-lisp
 (global-font-lock-mode t)
 
+(minibuffer-depth-indicate-mode 1)
+
 ;; Always indent on a newline. This setting affects Evil Insert mode too
 (global-set-key (kbd "RET") 'newline-and-indent)
 

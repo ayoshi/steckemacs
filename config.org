@@ -147,6 +147,95 @@ Here we create the directory =~/.emacs.d/elisp= if it does not exist, add it to 
 
 **** OSX specific setup
 
+If we're using emacs-macs port ( and beleive me, you should be)
+
+#+begin_src emacs-lisp
+;; Specific to the Mac Port by Yamamoto Mitsuharu aka. Railwaycat
+;; (not to be confused with the Emacs installed by MacPorts)
+
+;; Emacs Mac has a different set of defaults to Emacs Cocoa/NS
+;; I've used NS/Cocoa long enough to consider it the right way,
+;; and many of my key bindings extend from that.
+
+;; You may also like the Emacs cocoa keys, and want to use them with
+;; Emacs mac, so this is for you.
+
+;; Check for the existence of a function with mac- prefix
+(when (symbolp 'mac-control-modifier)
+  ;; Re-map modifiers
+  (setq mac-control-modifier 'control
+        mac-option-modifier 'meta
+        mac-command-modifier 'super)
+  )
+
+;; Fullscreen mode toggle in emacs mac. This invokes the Kiosk mode
+;; fullscreen, ie. only one display is hijacked. not the obnoxious
+;; Lion Fullscreen, which kills off all your other screens. Fine if
+;; you're just on a lappy. Not nice when you have several screens.
+;; Very poor user interface design if you ask me.
+;;
+;; Emacs mac also has the lion style available for mouse operation,
+;; with the Lion top right window button.
+;;
+;; So you get the best of both worlds.
+;;
+;; Side-note: Emacs mac port has pixel scrolling, and I'm a sucker for
+;; that.
+
+(defvar mac-fullscreen-on nil
+  "keep a track of mac-mouse-turn-o(n|ff)-fullscreen, assumes fullscreen is not on")
+(defun mac-toggle-fullscreen ()
+  "toggle fullscreen mode in Emacs mac (by Yamamoto Mitsuharu)"
+  (interactive)
+  ;; check we are in the emacs mac build
+  (when (functionp 'mac-process-hi-command)
+  (if (eq mac-fullscreen-on t)
+      (progn
+        (mac-mouse-turn-off-fullscreen t)
+        (setq mac-fullscreen-on nil)
+      )
+      (progn
+        (mac-mouse-turn-on-fullscreen t)
+        (setq mac-fullscreen-on t)
+      )
+    )))
+
+(when (and (window-system) (fboundp 'mac-mouse-turn-on-fullscreen))
+  (global-set-key (kbd "<M-s-return>") 'mac-toggle-fullscreen)
+)
+
+;; Bind "Emacs Mac port" keys the same as Emacs NS/Cocoa
+(when (symbolp 'mac-control-modifier)
+
+  (global-set-key (kbd "s-s") 'save-buffer)
+  (global-set-key (kbd "s-z") 'undo)
+  (global-set-key (kbd "s-x") 'cua-cut-region)
+  (global-set-key (kbd "s-c") 'cua-copy-region)
+  (global-set-key (kbd "s-v") 'cua-paste)
+  (global-set-key (kbd "s-w") 'delete-frame)
+  (global-set-key (kbd "s-q") 'save-buffers-kill-emacs)
+  (global-set-key (kbd "s-k") 'kill-this-buffer)
+  (global-set-key (kbd "s-u") 'revert-buffer)
+  (global-set-key (kbd "s-a") 'mark-whole-buffer)
+  (global-set-key (kbd "s-l") 'goto-line)
+  (global-set-key (kbd "s-'") 'switch-window)
+
+;;
+;; (global-set-key (kbd "<home>") 'beginning-of-buffer)
+;; (global-set-key (kbd "<end>") 'end-of-buffer)
+
+  ;; Navigating around frames, windows & buffers
+  (global-set-key (kbd "C-`") 'switch-window)
+  (global-set-key (kbd "C-~") 'other-frame)
+
+)
+#+end_src
+
+
+#+begin_src emacs-lisp :tangle yes
+
+#+end_src
+
 #+begin_src emacs-lisp
 (when (eq system-type 'darwin)
 
@@ -406,10 +495,10 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
 #+begin_src emacs-lisp :results silent
 (setq el-get-sources
       '(
-        (:name company-cider
-               :type github
-               :pkgname "steckerhalter/company-cider"
-               :prepare (eval-after-load 'company '(add-to-list 'company-backends 'company-cider)))
+        ;;(:name company-cider
+        ;;       :type github
+        ;;       :pkgname "steckerhalter/company-cider"
+        ;;       :prepare (eval-after-load 'company '(add-to-list 'company-backends 'company-cider)))
         (:name eval-sexp-fu
                :type http
                :url "http://www.emacswiki.org/emacs/download/eval-sexp-fu.el")
@@ -558,7 +647,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         multiple-cursors
         nrepl-eval-sexp-fu
         org
-        org-mobile-sync
+        ;;org-mobile-sync
         php-boris
         ;;yphp-eldoc
         php-mode
@@ -1002,36 +1091,6 @@ TODO Fix to work with iTerm on MAC
     ))
    )
   )
-#+end_src
-
-*** my-tks
-#+begin_src emacs-lisp
-(defun my-tks (ipos tables params)
-  "Formatting function for org `clocktable' that generates TKS compatible output.
-Usage example:
-,#+BEGIN: clocktable :scope agenda :block today :formatter my-tks :properties (\"project\")
-,#+END: clocktable
-"
-  (insert-before-markers (format-time-string "%d/%m/%Y\n\n"))
-  (let (tbl entry entries time)
-    (while (setq tbl (pop tables))
-      (setq entries (nth 2 tbl))
-      (while (setq entry (pop entries))
-        (when (string-match org-todo-regexp (nth 1 entry))
-          (let* ((level (car entry))
-                 (headline (replace-regexp-in-string (concat org-todo-regexp "\\( +\\|[ \t]*$\\)") "" (nth 1 entry)))
-                 (rest (mod (nth 3 entry) 60))
-                 (hours (/ (nth 3 entry) 60))
-                 (mins (cond
-                        ((<= rest 15) 0.25)
-                        ((<= rest 30) 0.5)
-                        ((<= rest 45) 0.75)
-                        (t 1)))
-                 (project (cdr (assoc "project" (nth 4 entry))))
-                 )
-            (insert-before-markers
-             (format "%s %s %s\n" (if project project "?") (+ hours mins) headline ))
-            ))))))
 #+end_src
 
 *** my-isearch-goto-match-beginning
@@ -2092,8 +2151,6 @@ Homepage: http://orgmode.org/
 
 #+begin_src emacs-lisp
 (require 'org)
-(require 'ox-org)
-(require 'ox-md)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (setq org-startup-folded t)
 (setq org-startup-indented nil)
@@ -2198,19 +2255,6 @@ Yasnippet integration
 (setcdr (assq 'todo org-agenda-sorting-strategy) '(todo-state-up priority-down category-keep))
 #+end_src
 
-***** Templates
-
-#+begin_src emacs-lisp
-(setq org-capture-templates
-      '(
-        ("t" "Task" entry (file "") "* TODO %?\n %a")
-        ("s" "Simple Task" entry (file "") "* TODO %?\n")
-        ))
-
-(add-to-list 'org-structure-template-alist '("E" "#+begin_src emacs-lisp\n?\n#+end_src\n"))
-(add-to-list 'org-structure-template-alist '("S" "#+begin_src shell-script\n?\n#+end_src\n"))
-#+end_src
-
 ***** Todo
 
 #+begin_src emacs-lisp
@@ -2255,29 +2299,6 @@ Load the project template for my blog
 
 Don't forget to set =org-mode-blog-publishing-directory= to the desired export location in =~/.user.el=.
 
-***** org-mobile-sync-mode
-
-#+begin_src emacs-lisp
-(when (boundp 'org-mobile-directory)
-  (setq org-mobile-inbox-for-pull (concat org-directory "/notes.org"))
-  (org-mobile-sync-mode 1))
-#+end_src
-
-Enable sync mode only if =org-mobile-directory= is set.
-
-***** LaTeX
-
-#+begin_src emacs-lisp
-(require 'ox-latex)
-(add-to-list 'org-latex-packages-alist '("" "minted"))
-(setq org-latex-listings 'minted)
-
-(setq org-latex-pdf-process
-      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
-
-#+end_src
 **** conf-mode
 
 #+begin_src emacs-lisp

@@ -1163,7 +1163,6 @@ so we have a dedicated functino that enables it
     (mapc 'kill-buffer
           (delq (current-buffer)
                 (remove-if-not 'buffer-file-name (buffer-list)))))
-(evil-ex-define-cmd "killb" 'kill-other-buffers)
 #+end_src
 
 ** Global hooks and advices
@@ -2715,6 +2714,9 @@ TODO move evil bindings to separate table
 
 ;; ;; Use DASH for documentaton
 (define-key evil-normal-state-map (kbd "?") 'dash-at-point)
+
+;; Some commands
+(evil-ex-define-cmd "killb" 'kill-other-buffers)
 #+end_src
 
 ** Sublime and other friends

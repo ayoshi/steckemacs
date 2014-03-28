@@ -1138,6 +1138,34 @@ Pass symbol-name to the function DOC-FUNCTION."
 
 I wanted to be able to get a documentation popup without having to trigger auto-complete. It's mostly stolen from [[http://jaderholm.com/][Scott Jaderholm]] (the code is on [[http://www.emacswiki.org/emacs/AutoComplete][Emacswiki]]), but has been made more general to also work with other completion functions.
 
+*** omnicompletion-like-vim
+
+Activate all words omnicompletion like in vim
+particularly handy for text files, todo lists. However not always
+useful since it sucks in code where it mixes up syntax with comments
+so we have a dedicated functino that enables it
+
+#+begin_src emacs-lisp :tangle yes
+defun omnicompletion-like-vim ()
+  (interactive)
+  (require 'dabbrev)
+  (require 'ac-dabbrev)
+  (auto-complete-mode))
+#+end_src
+
+*** kill-other-buffers
+
+#+begin_src emacs-lisp :tangle yes
+;; Kill all buffers except for the current one
+(defun kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer
+          (delq (current-buffer)
+                (remove-if-not 'buffer-file-name (buffer-list)))))
+(evil-ex-define-cmd "killb" 'kill-other-buffers)
+#+end_src
+
 ** Global hooks and advices
 
 #+begin_src emacs-lisp

@@ -1146,7 +1146,7 @@ useful since it sucks in code where it mixes up syntax with comments
 so we have a dedicated functino that enables it
 
 #+begin_src emacs-lisp :tangle yes
-defun omnicompletion-like-vim ()
+(defun omnicompletion-like-vim ()
   (interactive)
   (require 'dabbrev)
   (require 'ac-dabbrev)

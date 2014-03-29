@@ -638,6 +638,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         jinja2-mode
         js2-mode
         json-mode
+        json-reformat
         key-chord
         markdown-mode+
         melpa-upstream-visit
@@ -988,6 +989,14 @@ This will reset it to the default background
   (set-face-background 'git-gutter:unchanged nil))
 #+end_src
 
+This one is for fast switching
+#+begin_src emacs-lisp :tangle yes
+(defun theme-dark()
+  (interactive)
+  (progn
+    (load-theme 'odersky t)
+    (set-face-attribute 'default nil :font (font-candidate "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true" "PragmataPro-16:weight=normal" "Menlo-16:weight=normal" "DejaVu Sans Mono-10:weight=normal"))))
+#+end_src
 
 ** Custom Functions
 *** my-url-insert-file-contents
@@ -2725,7 +2734,7 @@ Collection of things that I liked from other editors.
 
 *** Shift-Cmd-P from Sublime ( command palette )
 
-Can be emulated by grizzlr
+Can be emulated by grizzlr or ido
 
 #+begin_src emacs-lisp
 (defun sublime-csp ()

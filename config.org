@@ -904,34 +904,34 @@ The code for the keys is generated from data in an Org table named =keys= using 
 
 
 **** Evil Key definition table                                     :noexport:
-#+TBLNAME: evil_keys
-| Combo      | Category            | Desciption                           | Command                                 |
-| ;          | Evil Prefixes       | <Leader> key for further keybindings |                                         |
-| <Leader>jc | Evil Ace            | Jump Char                            | 'evil-ace-jump-char-mode                 |
-| <Leader>jw | Evil Ace            | Jump Word                            | 'evil-ace-jump-word-mode                 |
-| <Leader>jl | Evil Ace            | Jump Line                            | 'evil-ace-jump-line-mode                 |
-| <Leader>ci | Evil Nerd Commenter | Comment/Uncomment to the line        | 'evilnc-comment-or-uncomment-to-the-line |
-| <Leader>cl | Evil Nerd Commenter | Copy and Comment lines               | 'evilnc-copy-and-comment-lines           |
-| <Leader>cp | Evil Nerd Commenter | Comment/Uncomment paragraphs         | 'evilnc-comment-or-uncomment-paragraphs  |
-| <Leader>cr | Evil Nerd Commenter | Comment/Uncomment region             | 'evilnc-comment-or-uncomment-region      |
+     #+TBLNAME: evil_keys
+     | Combo      | Category            | Desciption                           | Command                                 |
+     | ;          | Evil Prefixes       | <Leader> key for further keybindings |                                         |
+     | <Leader>jc | Evil Ace            | Jump Char                            | 'evil-ace-jump-char-mode                 |
+     | <Leader>jw | Evil Ace            | Jump Word                            | 'evil-ace-jump-word-mode                 |
+     | <Leader>jl | Evil Ace            | Jump Line                            | 'evil-ace-jump-line-mode                 |
+     | <Leader>ci | Evil Nerd Commenter | Comment/Uncomment to the line        | 'evilnc-comment-or-uncomment-to-the-line |
+     | <Leader>cl | Evil Nerd Commenter | Copy and Comment lines               | 'evilnc-copy-and-comment-lines           |
+     | <Leader>cp | Evil Nerd Commenter | Comment/Uncomment paragraphs         | 'evilnc-comment-or-uncomment-paragraphs  |
+     | <Leader>cr | Evil Nerd Commenter | Comment/Uncomment region             | 'evilnc-comment-or-uncomment-region      |
 
-Keybinding which are provided by corresponding plugins can be found in their documentation
+     Keybinding which are provided by corresponding plugins can be found in their documentation
 
-[[https://github.com/Dewdrops/evil-extra-operator]]
-[[https://github.com/tarao/evil-plugins]]
-[[https://github.com/redguardtoo/evil-nerd-commenter]]
-[[https://github.com/redguardtoo/evil-matchit]]
-[[https://github.com/Dewdrops/evil-exchange]]
-[[https://github.com/timcharper/evil-surround]]
-[[https://github.com/Dewdrops/evil-extra-operator]]
+     [[https://github.com/Dewdrops/evil-extra-operator]]
+     [[https://github.com/tarao/evil-plugins]]
+     [[https://github.com/redguardtoo/evil-nerd-commenter]]
+     [[https://github.com/redguardtoo/evil-matchit]]
+     [[https://github.com/Dewdrops/evil-exchange]]
+     [[https://github.com/timcharper/evil-surround]]
+     [[https://github.com/Dewdrops/evil-extra-operator]]
 
 ** Theme, Faces, Frame
 
-Here goes everything theme-related.
+   Here goes everything theme-related.
 
 *** Pre-theme
 
-First things first - resetting theme to default on any load-theme will fix all small problems during theme change
+    First things first - resetting theme to default on any load-theme will fix all small problems during theme change
 
 #+begin_src emacs-lisp
 (defadvice load-theme
@@ -946,11 +946,21 @@ Treat all themes as safe - don't see a real reason not too.
 #+end_src
 
 *** Set theme, face, frame
-I prefer hickey theme from sublime-themes packages
+
+I really like solariazed and themes from [[https://github.com/owainlewis/emacs-color-themes/][Emacs Color Themes]]
+
+Here's a preview from two of my favorite ones:
 
 #+CAPTION: Hickey
 #+NAME: Hickey theme
 https://raw.github.com/owainlewis/emacs-color-themes/master/previews/hickey.png
+
+#+CAPTION: Odersky
+#+NAME: Hickey theme
+https://raw.github.com/owainlewis/emacs-color-themes/master/previews/odersky.png
+
+Also, for those who don't want to shell out for PragmataPro, the free [[http://mplus-fonts.sourceforge.jp/mplus-outline-fonts/download/index-en.html][M+ font]] is a tough one to beat.
+They both are abolutely amazing each in it's own way.
 
 #+begin_src emacs-lisp
 (load-theme 'solarized-light t)
@@ -960,11 +970,14 @@ Select the first available font in order of preference
 
 #+begin_src emacs-lisp
 (require 'dash)
-  (defun font-candidate (&rest fonts)
-    "Return the first available font."
-    (--first (find-font (font-spec :name it)) fonts))
+(defun font-candidate (&rest fonts)
+  "Return the first available font."
+  (--first (find-font (font-spec :name it)) fonts))
 
-(set-face-attribute 'default nil :font (font-candidate "PragmataPro-16:weight=normal" "Menlo-16:weight=normal" "DejaVu Sans Mono-10:weight=normal"))
+(set-face-attribute 'default nil :font (font-candidate "PragmataPro-16:weight=normal"
+                                                       "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true"
+                                                       "Menlo-16:weight=normal"
+                                                       "DejaVu Sans Mono-10:weight=normal"))
 #+end_src
 
 Put that line into =~/.user.el= which is loaded [[*User%20Settings][in this init file too.]]

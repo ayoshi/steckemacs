@@ -2698,9 +2698,10 @@ TODO move evil bindings to separate table
 (evil-leader/set-key "lB" 'ibuffer)
 
 (evil-leader/set-key "lf" 'ido-find-file)
-;; For recent file grizzl seems like better choice
-;; But IDO function is also available
 (evil-leader/set-key "lr" 'recentf-ido-find-file)
+
+(evil-leader/set-key "ld" 'cd)
+
 
 ;; simulate vim's "nnoremap <space> 10jzz"
 (define-key evil-normal-state-map " " (lambda ()

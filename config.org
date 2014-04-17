@@ -441,7 +441,6 @@ Mouse mode must be initialised for each new terminal [[http://stackoverflow.com/
                              (scroll-up 1)))
 #+end_src
 
-
 ** Install all needed packages
 
 *** Online Check
@@ -508,18 +507,6 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         (:name magit-filenotify
                :type git
                :url "https://github.com/magit/magit-filenotify")
-        (:name ob-php
-               :type git
-               :url "https://github.com/steckerhalter/ob-php"
-               :prepare (progn
-                          (add-to-list 'org-babel-load-languages '(php . t))
-                          (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)))
-        (:name php-align
-               :type git
-               :url "https://github.com/tetsujin/emacs-php-align")
-        (:name php-boris-minor-mode
-               :type git
-               :url "https://github.com/steckerhalter/php-boris-minor-mode")
         ;; TODO: fix the package
         ;;(:name evil-extra-operator
         ;;       :type github
@@ -532,24 +519,21 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         ;;       :type github
         ;;       :features evil-plugins
         ;;       :pkgname "tarao/evil-plugins")
-        (:name powerline
-               :type github
-               :pkgname "milkypostman/powerline")
-        (:name emacs-soothe-theme
-               :type github
-               :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/emacs-soothe-theme")
-               :pkgname "milkypostman/emacs-soothe-theme")
+        ;;(:name powerline
+        ;;       :type github
+        ;;       :pkgname "milkypostman/powerline")
+        ;;(:name emacs-soothe-theme
+        ;;       :type github
+        ;;       :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/emacs-soothe-theme")
+        ;;       :pkgname "milkypostman/emacs-soothe-theme")
         (:name replace-colorthemes
                :type github
                :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/replace-colorthemes")
                :pkgname "emacs-jp/replace-colorthemes")
-        (:name php-documentor
-               :type http
-               :url "https://raw.github.com/wenbinye/dot-emacs/master/site-lisp/contrib/php-documentor.el")
         ))
 #+end_src
 
-These are simple El-Get recipes that will either fetch single Elisp files or clone a Git repo. The =ob-php= recipe uses a neat El-Get feature that allows to do some preparation after the installation.
+These are simple El-Get recipes that will either fetch single Elisp files or clone a Git repo.
 
 #+begin_src emacs-lisp
 (setq my-el-get-packages
@@ -567,6 +551,7 @@ The sync function expects the package names which are extracted from =el-get-sou
 #+begin_src emacs-lisp
    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
+   (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 #+end_src
 
 This adds two remote package repositories. The repo from the FSF is already included in Emacs 24 (see http://elpa.gnu.org/).
@@ -621,6 +606,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         grizzl
         haskell-mode
         hide-comnt
+        hideshowvis
         highlight
         helm
         helm-descbinds
@@ -649,7 +635,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         nrepl-eval-sexp-fu
         org
         ;;org-mobile-sync
-        php-boris
+        powerline
         ;;yphp-eldoc
         php-mode
         popup
@@ -878,29 +864,27 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-h C-.           | Org         | Open/switch to home.org                                   | (lambda () (interactive) (find-file "~/org/home.org"))      |
 | C-h C-u           | Org         | Open/switch to work.org                                   | (lambda () (interactive) (find-file "~/org/work.org"))      |
 | C-h C-w           | Org         | Cut the current subtree into the clipboard                | 'org-cut-subtree                                            |
-| C-c v             | PHP         | var dump die template                                     | 'var_dump-die                                                |
-| C-c V             | PHP         | var dump template                                         | 'var_dump                                                    |
 | M-;               | Evil        | Comment/Uncomment line                                    | 'evilnc-comment-or-uncomment-lines                          |
 | C-c l             | Evil        | Comment/Uncomment to the line                             | 'evilnc-comment-or-uncomment-to-the-line                    |
 | C-c c             | Evil        | Copy and Comment lines                                    | 'evilnc-copy-and-comment-lines                              |
 | C-c p             | Evil        | Comment/Uncomment paragraphs                              | 'evilnc-comment-or-uncomment-paragraphs                     |
 | ESC               | Global      | Replace Ctl-g                                             | 'keyboard-escape-quit                                       |
 | <C-M-h>           | Smartparens | Forward Sexp                                              | 'sp-forward-sexp                                            |
-| <C-M-l>             | Smartparens | Backward Sexp                                             | 'sp-backward-sexp                                           |
-| <C-M-j>             | Smartparens | Down Sexp                                                 | 'sp-down-sexp                                               |
-| <C-M-k>             | Smartparens | Up Sexp                                                   | 'sp-up-sexp                                                 |
-| <C-M-a>             | Smartparens | Backward Down Sexp                                        | 'sp-backward-down-sexp                                      |
-| <C-M-u>             | Smartparens | Backward Up Sexp                                          | 'sp-backward-up-sexp                                        |
-| <C-M-n>             | Smartparens | Next Sexp                                                 | 'sp-next-sexp                                               |
-| <C-M-p>             | Smartparens | Previous Sexp                                             | 'sp-previous-sexp                                           |
-| <C-M-k>             | Smartparens | Kill Sexp                                                 | 'sp-kill-sexp                                               |
+| <C-M-l>           | Smartparens | Backward Sexp                                             | 'sp-backward-sexp                                           |
+| <C-M-j>           | Smartparens | Down Sexp                                                 | 'sp-down-sexp                                               |
+| <C-M-k>           | Smartparens | Up Sexp                                                   | 'sp-up-sexp                                                 |
+| <C-M-a>           | Smartparens | Backward Down Sexp                                        | 'sp-backward-down-sexp                                      |
+| <C-M-u>           | Smartparens | Backward Up Sexp                                          | 'sp-backward-up-sexp                                        |
+| <C-M-n>           | Smartparens | Next Sexp                                                 | 'sp-next-sexp                                               |
+| <C-M-p>           | Smartparens | Previous Sexp                                             | 'sp-previous-sexp                                           |
+| <C-M-k>           | Smartparens | Kill Sexp                                                 | 'sp-kill-sexp                                               |
 | <M-delete>        | Smartparens | Unwrap Sexp                                               | 'sp-unwrap-sexp                                             |
 | <M-backspace>     | Smartparens | Backward Unwrap Sexp                                      | 'sp-backward-unwrap-sexp                                    |
 | C-S-<right>       | Smartparens | Forward Slurp Sexp                                        | 'sp-forward-slurp-sexp                                      |
 | C-S-<left>        | Smartparens | Forward Barf Sexp                                         | 'sp-forward-barf-sexp                                       |
 | <C-M-left>        | Smartparens | Backward Slurp Sexp                                       | 'sp-backward-slurp-sexp                                     |
 | <C-M-right>       | Smartparens | Backward Barf Sexp                                        | 'sp-backward-barf-sexp                                      |
-| <C-M-D>             | Smartparens | Slice Sexp                                                | 'sp-slice-sexp                                             |
+| <C-M-D>           | Smartparens | Slice Sexp                                                | 'sp-slice-sexp                                              |
 
 
 **** Evil Key definition table                                     :noexport:
@@ -2134,6 +2118,22 @@ The modes where flycheck should be enabled.
 (require 'iedit)
 (setq iedit-unmatched-lines-invisible-default t)
 #+end_src
+**** hideshowvis
+
+#+begin_src emacs-lisp :tangle yes
+
+(require 'hideshowvis)
+
+(eval-after-load "hideshowvis"
+  `(progn (load "hideshow-fringe" t)))
+
+(autoload 'hideshowvis-enable "hideshowvis" "Highlight foldable regions")
+
+(autoload 'hideshowvis-minor-mode "hideshowvis" "Will indicate regions foldable with hideshow in the fringe." 'interactive)
+
+(add-hook 'prog-mode-hook 'hideshowvis-enable)
+#+end_src
+
 *** Clojure
 **** cider
 

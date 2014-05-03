@@ -607,6 +607,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         haskell-mode
         hide-comnt
         hideshowvis
+        hideshow-org
         highlight
         helm
         helm-descbinds
@@ -958,10 +959,11 @@ Select the first available font in order of preference
   "Return the first available font."
   (--first (find-font (font-spec :name it)) fonts))
 
-(set-face-attribute 'default nil :font (font-candidate "PragmataPro-16:weight=normal"
-                                                       "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true"
-                                                       "Menlo-16:weight=normal"
-                                                       "DejaVu Sans Mono-10:weight=normal"))
+(set-face-attribute 'default nil :font (font-candidate
+                                        "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true"
+                                        "PragmataPro-16:weight=normal"
+                                        "Menlo-16:weight=normal"
+                                        "DejaVu Sans Mono-10:weight=normal"))
 #+end_src
 
 Put that line into =~/.user.el= which is loaded [[*User%20Settings][in this init file too.]]
@@ -1630,7 +1632,6 @@ We can use IDO to complete anything. [[http://www.emacswiki.org/emacs/Interactiv
         ad-do-it))))
 #+end_src
 
-
 **** smex
 
 Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason that helm doesn't do flex matching
@@ -2118,7 +2119,9 @@ The modes where flycheck should be enabled.
 (require 'iedit)
 (setq iedit-unmatched-lines-invisible-default t)
 #+end_src
-**** hideshowvis
+**** hideshow
+
+I like to see folding marks in fringe
 
 #+begin_src emacs-lisp :tangle yes
 
@@ -2132,6 +2135,10 @@ The modes where flycheck should be enabled.
 (autoload 'hideshowvis-minor-mode "hideshowvis" "Will indicate regions foldable with hideshow in the fringe." 'interactive)
 
 (add-hook 'prog-mode-hook 'hideshowvis-enable)
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(require 'hideshow-org)
 #+end_src
 
 *** Clojure

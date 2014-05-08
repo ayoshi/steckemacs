@@ -2707,6 +2707,11 @@ TODO move evil bindings to separate table
 (evil-leader/set-key "lf" 'ido-find-file)
 (evil-leader/set-key "lr" 'recentf-ido-find-file)
 
+;; Projectile
+(evil-leader/set-key "pf" 'projectile-find-file)
+(evil-leader/set-key "pr" 'projectile-recentf)
+(evil-leader/set-key "po" 'projectile-multioccur)
+
 (evil-leader/set-key "ld" 'cd)
 
 

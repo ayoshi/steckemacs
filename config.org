@@ -231,6 +231,9 @@ If we're using emacs-macs port ( and beleive me, you should be)
 )
 #+end_src
 
+#+RESULTS:
+: other-frame
+
 
 #+begin_src emacs-lisp :tangle yes
 
@@ -239,7 +242,7 @@ If we're using emacs-macs port ( and beleive me, you should be)
 #+begin_src emacs-lisp
 (when (eq system-type 'darwin)
 
-  (setq default-input-method "MacOSX")
+  ;;(setq default-input-method "MacOSX")
 
   ;; Make cut and paste work with the OS X clipboard
   (defun copy-from-osx ()
@@ -714,12 +717,13 @@ We need to turn the mode on here so that we can map keys further below. We lower
 (mapcar (lambda (l)
           (let* ((key (car l))
                  (def
-                  (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key)) (format "key-chord-define-global \"%s\"" key))
-                        (t (format "global-set-key (kbd \"%s\")" key)))
-                  )
+                  (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
+                         (format "key-chord-define-global \"%s\"" key))
+                        ((string-match "^<Leader>[[:alnum:]]*$" (format "%s" key))
+                         (format "evil-leader/set-key \"%s\"" (cadr (split-string key "<Leader>"))))
+                        (t (format "global-set-key (kbd \"%s\")" key))))
                  (command (car (last l))))
-            (princ (format "(%s %s)\n" def command))))
-        keys)
+            (princ (format "(%s %s)\n" def command)))) keys)
 #+end_src
 
 #+begin_src emacs-lisp :noweb yes :results silent
@@ -862,11 +866,11 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-h C-.           | Org         | Open/switch to home.org                                   | (lambda () (interactive) (find-file "~/org/home.org"))      |
 | C-h C-u           | Org         | Open/switch to work.org                                   | (lambda () (interactive) (find-file "~/org/work.org"))      |
 | C-h C-w           | Org         | Cut the current subtree into the clipboard                | 'org-cut-subtree                                            |
-| M-;               | Evil        | Comment/Uncomment line                                    | 'evilnc-comment-or-uncomment-lines                          |
-| C-c l             | Evil        | Comment/Uncomment to the line                             | 'evilnc-comment-or-uncomment-to-the-line                    |
-| C-c c             | Evil        | Copy and Comment lines                                    | 'evilnc-copy-and-comment-lines                              |
-| C-c p             | Evil        | Comment/Uncomment paragraphs                              | 'evilnc-comment-or-uncomment-paragraphs                     |
-| ESC               | Global      | Replace Ctl-g                                             | 'keyboard-escape-quit                                       |
+| <Leader>ci        | Evil        | Comment/Uncomment line                                    | 'evilnc-comment-or-uncomment-lines                          |
+| <Leader>cl        | Evil        | Comment/Uncomment to the line                             | 'evilnc-comment-or-uncomment-to-the-line                    |
+| <Leader>cc        | Evil        | Copy and Comment lines                                    | 'evilnc-copy-and-comment-lines                              |
+| <Leader>cp        | Evil        | Comment/Uncomment paragraphs                              | 'evilnc-comment-or-uncomment-paragraphs                     |
+| <Leader>cr        | Evil        | Comment/Uncomment region                                  | 'evilnc-comment-or-uncomment-region                         |
 | <C-M-h>           | Smartparens | Forward Sexp                                              | 'sp-forward-sexp                                            |
 | <C-M-l>           | Smartparens | Backward Sexp                                             | 'sp-backward-sexp                                           |
 | <C-M-j>           | Smartparens | Down Sexp                                                 | 'sp-down-sexp                                               |
@@ -883,25 +887,29 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | <C-M-left>        | Smartparens | Backward Slurp Sexp                                       | 'sp-backward-slurp-sexp                                     |
 | <C-M-right>       | Smartparens | Backward Barf Sexp                                        | 'sp-backward-barf-sexp                                      |
 | <C-M-D>           | Smartparens | Slice Sexp                                                | 'sp-slice-sexp                                              |
+| <Leader>,         | Evil        | SMEX                                                      | 'smex                                                       |
+| <Leader>lb        | Evil        | Switch Buffers with IDO                                   | 'ido-switch-buffer                                          |
+| <Leader>lB        | Evil        | Extended Buffer List                                      | 'ibuffer                                                    |
+| <Leader>lf        | Evil        | Load file                                                 | 'ido-find-file                                              |
+| <Leader>lr        | Evil        | Load recent file                                          | 'recentf-ido-find-file                                      |
+| <Leader>pf        | Evil        | Find file in project                                      | 'projectile-find-file                                       |
+| <Leader>po        | Evil        | Occur in project                                          | 'projectile-recentf                                         |
+| <Leader>pr        | Evil        | Find recent file in project                               | 'projectile-multioccur                                      |
+| <Leader>ld        | Evil        | cd to directory                                           | 'cd                                                         |
+| <Leader>h        | Evil        | Split window horizontally                                 | 'split-window-horizontally                                  |
+| <Leader>v        | Evil        | Split window vertically                                   | 'split-window-verticall                                     |
+| <Leader>gs        | Evil        | GIT status                                                | 'magit-status                                               |
+| <Leader>u         | Evil        | Undo tree                                                 | 'undo-tree-visualize                                        |
+| <Leader>jc        | Evil        | Jump char                                                 | 'evil-ace-jump-char-mode                                    |
+| <Leader>jw        | Evil        | Jump word                                                 | 'evil-ace-jump-word-mode                                    |
+| <Leader>jl        | Evil        | Jump line                                                 | 'evil-ace-jump-line-mode                                    |
 
-
-**** Evil Key definition table                                     :noexport:
-     #+TBLNAME: evil_keys
-     | Combo      | Category            | Desciption                           | Command                                 |
-     | ;          | Evil Prefixes       | <Leader> key for further keybindings |                                         |
-     | <Leader>jc | Evil Ace            | Jump Char                            | 'evil-ace-jump-char-mode                 |
-     | <Leader>jw | Evil Ace            | Jump Word                            | 'evil-ace-jump-word-mode                 |
-     | <Leader>jl | Evil Ace            | Jump Line                            | 'evil-ace-jump-line-mode                 |
-     | <Leader>ci | Evil Nerd Commenter | Comment/Uncomment to the line        | 'evilnc-comment-or-uncomment-to-the-line |
-     | <Leader>cl | Evil Nerd Commenter | Copy and Comment lines               | 'evilnc-copy-and-comment-lines           |
-     | <Leader>cp | Evil Nerd Commenter | Comment/Uncomment paragraphs         | 'evilnc-comment-or-uncomment-paragraphs  |
-     | <Leader>cr | Evil Nerd Commenter | Comment/Uncomment region             | 'evilnc-comment-or-uncomment-region      |
+**** Evil plugins keybindings
 
      Keybinding which are provided by corresponding plugins can be found in their documentation
 
      [[https://github.com/Dewdrops/evil-extra-operator]]
      [[https://github.com/tarao/evil-plugins]]
-     [[https://github.com/redguardtoo/evil-nerd-commenter]]
      [[https://github.com/redguardtoo/evil-matchit]]
      [[https://github.com/Dewdrops/evil-exchange]]
      [[https://github.com/timcharper/evil-surround]]
@@ -2610,17 +2618,6 @@ Enable <Leader>. Set the <Leade> key to ; ( on home row )
 (global-evil-matchit-mode 1)
 #+end_src
 
-*** Evil Nerd Commenter
-
-#+begin_src emacs-lisp
-(evil-leader/set-key "ci" 'evilnc-comment-or-uncomment-lines)
-(evil-leader/set-key "cl" 'evilnc-comment-or-uncomment-to-the-line)
-(evil-leader/set-key "cc" 'evilnc-copy-and-comment-lines)
-(evil-leader/set-key "cp" 'evilnc-comment-or-uncomment-paragraphs)
-(evil-leader/set-key "cr" 'comment-or-uncomment-region)
-
-#+end_src
-
 *** Evil Exchange
 #+begin_src emacs-lisp
 ;;(evil-exchange-install)
@@ -2683,39 +2680,13 @@ appear as one.
    (ace-jump-mode 5)
    (forward-char -1))))
 
-;; Set keybindings for ace-mode
-(evil-leader/set-key
-  "jc" 'evil-ace-jump-char-mode
-  "jw" 'evil-ace-jump-word-mode
-  "jl" 'evil-ace-jump-line-mode)
 #+end_src
 
 *** Custom key bindings
 
 Those are cusom bindings that I use.
 
-TODO move evil bindings to separate table
-
 #+begin_src emacs-lisp
-;;Use <Leader>, to bring up emacs command
-(evil-leader/set-key "," 'smex)
-
-;; Emulate some behavior of Lusty*
-
-;; Leader lb - ido buffers lf - ido files
-(evil-leader/set-key "lb" 'ido-switch-buffer)
-(evil-leader/set-key "lB" 'ibuffer)
-
-(evil-leader/set-key "lf" 'ido-find-file)
-(evil-leader/set-key "lr" 'recentf-ido-find-file)
-
-;; Projectile
-(evil-leader/set-key "pf" 'projectile-find-file)
-(evil-leader/set-key "pr" 'projectile-recentf)
-(evil-leader/set-key "po" 'projectile-multioccur)
-
-(evil-leader/set-key "ld" 'cd)
-
 
 ;; simulate vim's "nnoremap <space> 10jzz"
 (define-key evil-normal-state-map " " (lambda ()
@@ -2732,18 +2703,8 @@ TODO move evil bindings to separate table
                                                 (previous-line 10)
                                                 (evil-scroll-line-up 10)))
 
-;; Working with splits
-(evil-leader/set-key "|" 'split-window-horizontally )
-(evil-leader/set-key "\\" 'split-window-vertically)
-
 ;; Use Shift-arrows to move around splits
 (windmove-default-keybindings)
-
-;; Magit status screen
-(evil-leader/set-key "gs" 'magit-status)
-
-;;Undo tree
-(evil-leader/set-key "u" 'undo-tree-visualize)
 
 ;; Super escape using chords
 (key-chord-define-global "jk"  'evil-normal-state) ; super ESC

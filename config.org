@@ -714,10 +714,8 @@ We need to turn the mode on here so that we can map keys further below. We lower
 (mapcar (lambda (l)
           (let* ((key (car l))
                  (def
-                  (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
-                         (format "key-chord-define-global \"%s\"" key))
-                        (t
-                         (format "global-set-key (kbd \"%s\")" key)))
+                  (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key)) (format "key-chord-define-global \"%s\"" key))
+                        (t (format "global-set-key (kbd \"%s\")" key)))
                   )
                  (command (car (last l))))
             (princ (format "(%s %s)\n" def command))))
@@ -749,7 +747,6 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | C-c C-f           | General     | Toggle flyspell mode (spellchecking)                      | 'flyspell-mode                                              |
 | C-S-p             | General     | Sublime-like command palette (execute command)            | 'sublime-csp                                                |
 | M-x               | General     | Smex (execute command)                                    | 'smex                                                       |
-| M-X               | General     | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
 | M-X               | General     | Smex (execute major mode command)                         | 'smex-major-mode-commands                                   |
 | C-h C-h           | General     | Helm M-x (execute command)                                | 'helm-M-x                                                   |
 | C-h h             | General     | Helm navigate project files                               | 'helm-projectile                                            |
@@ -955,15 +952,20 @@ Select the first available font in order of preference
 
 #+begin_src emacs-lisp
 (require 'dash)
+
 (defun font-candidate (&rest fonts)
   "Return the first available font."
   (--first (find-font (font-spec :name it)) fonts))
 
-(set-face-attribute 'default nil :font (font-candidate
-                                        "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true"
-                                        "PragmataPro-16:weight=normal"
-                                        "Menlo-16:weight=normal"
-                                        "DejaVu Sans Mono-10:weight=normal"))
+(when (window-system)
+  (set-face-attribute 'default nil :font (font-candidate
+                                          "M+ 2m:pixelsize=16:weight=light:slant=normal:width=normal:spacing=100:scalable=true"
+                                          "PragmataPro-16:weight=normal"
+                                          "Menlo-16:weight=normal"
+                                          "DejaVu Sans Mono-10:weight=normal")))
+
+
+
 #+end_src
 
 Put that line into =~/.user.el= which is loaded [[*User%20Settings][in this init file too.]]
@@ -2422,7 +2424,7 @@ Github: https://github.com/jorgenschaefer/elpy
 (defvar pyenv-path "~/.pyenv"
   "pyenv root directory.")
 
-(setq elpy-rpc-backend "jedi")
+(setq elpy-rpc-backend "rope")
 
 (when (file-exists-p pyenv-path)
   (let ((bin-path (concat pyenv-path "/bin"))

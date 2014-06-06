@@ -292,8 +292,7 @@ First - let's clean up some visual clutter
 
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-;; Menu bar is not really a hindrance in Mac GUI mode
-;; (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(if (not window-system) (menu-bar-mode 0))
 #+end_src
 
 The only way to disable both audio and visual bells.
@@ -389,7 +388,6 @@ Custom file should be under it's own dir.
 #+begin_src emacs-lisp
 (setq custom-file (expand-file-name (concat conf-custom-dir "emacs-custom.el")))
 #+end_src
-
 
 *** Scratch buffer
 
@@ -719,8 +717,8 @@ We need to turn the mode on here so that we can map keys further below. We lower
                  (def
                   (cond ((string-match "^[[:alnum:]]\\{2\\}$" (format "%s" key))
                          (format "key-chord-define-global \"%s\"" key))
-                        ((string-match "^<Leader>[[:alnum:]]*$" (format "%s" key))
-                         (format "evil-leader/set-key \"%s\"" (cadr (split-string key "<Leader>"))))
+                        ((string-match "^<Leader>*" (format "%s" key))
+                         (format "evil-leader/set-key (kbd \"%s\")" (cadr (split-string key "<Leader>"))))
                         (t (format "global-set-key (kbd \"%s\")" key))))
                  (command (car (last l))))
             (princ (format "(%s %s)\n" def command)))) keys)
@@ -896,8 +894,8 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | <Leader>po        | Evil        | Occur in project                                          | 'projectile-recentf                                         |
 | <Leader>pr        | Evil        | Find recent file in project                               | 'projectile-multioccur                                      |
 | <Leader>ld        | Evil        | cd to directory                                           | 'cd                                                         |
-| <Leader>h        | Evil        | Split window horizontally                                 | 'split-window-horizontally                                  |
-| <Leader>v        | Evil        | Split window vertically                                   | 'split-window-verticall                                     |
+| <Leader>h         | Evil        | Split window horizontally                                 | 'split-window-horizontally                                  |
+| <Leader>v         | Evil        | Split window vertically                                   | 'split-window-verticall                                     |
 | <Leader>gs        | Evil        | GIT status                                                | 'magit-status                                               |
 | <Leader>u         | Evil        | Undo tree                                                 | 'undo-tree-visualize                                        |
 | <Leader>jc        | Evil        | Jump char                                                 | 'evil-ace-jump-char-mode                                    |
@@ -937,7 +935,7 @@ Treat all themes as safe - don't see a real reason not too.
 
 *** Set theme, face, frame
 
-I really like solariazed and themes from [[https://github.com/owainlewis/emacs-color-themes/][Emacs Color Themes]]
+I really like solarized and themes from [[https://github.com/owainlewis/emacs-color-themes/][Emacs Color Themes]]
 
 Here's a preview from two of my favorite ones:
 
@@ -953,7 +951,11 @@ Also, for those who don't want to shell out for PragmataPro, the free [[http://m
 They both are abolutely amazing each in it's own way.
 
 #+begin_src emacs-lisp
-(load-theme 'solarized-light t)
+
+(if (display-graphic-p)
+    (load-theme 'solarized-light t)
+  (load-theme 'sanityinc-tomorrow-night))
+
 #+end_src
 
 Select the first available font in order of preference
@@ -1769,9 +1771,8 @@ A distinguishing feature of this library is that it tracks the urgency of each n
 (global-fixmee-mode 1)
 #+end_src
 
-I had tried similar modes like =fic-ext=mode= but fount them lacking a bit. Let's see how this one performs...
+I had tried similar modes like =fic-ext=mode= but found them lacking a bit. Let's see how this one performs...
 
-TODO: Seems not to work in org mode
 **** smart-mode-line
 
 #+BEGIN_QUOTE
@@ -2269,7 +2270,6 @@ Yasnippet integration
 
 (add-hook 'org-mode-hook 'yas-minor-mode)
 #+end_src
-
 
 ***** Agenda
 
@@ -2855,6 +2855,12 @@ Mainly, I liked his idea to remove all the clutter and make minor modes almost i
                   ))
 
 
+#+end_src
+
+** Let terminal set background color, emacs sucks at it
+
+#+begin_src emacs-lisp :tangle yes
+(custom-set-faces (if (not window-system) '(default ((t (:background "nil"))))))
 #+end_src
 
 ** Allow for user and host local configuration - they can override everything

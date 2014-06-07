@@ -894,8 +894,9 @@ The code for the keys is generated from data in an Org table named =keys= using 
 | <Leader>po        | Evil        | Occur in project                                          | 'projectile-recentf                                         |
 | <Leader>pr        | Evil        | Find recent file in project                               | 'projectile-multioccur                                      |
 | <Leader>ld        | Evil        | cd to directory                                           | 'cd                                                         |
-| <Leader>h         | Evil        | Split window horizontally                                 | 'split-window-horizontally                                  |
-| <Leader>v         | Evil        | Split window vertically                                   | 'split-window-verticall                                     |
+| <Leader>wh        | Evil        | Split window horizontally                                 | 'split-window-vertically                                    |
+| <Leader>wv        | Evil        | Split window vertically                                   | 'split-window-horizontally                                  |
+| <Leader>wc        | Evil        | Close current split                                       | 'evil-window-delete                                         |
 | <Leader>gs        | Evil        | GIT status                                                | 'magit-status                                               |
 | <Leader>u         | Evil        | Undo tree                                                 | 'undo-tree-visualize                                        |
 | <Leader>jc        | Evil        | Jump char                                                 | 'evil-ace-jump-char-mode                                    |

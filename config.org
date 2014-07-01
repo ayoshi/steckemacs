@@ -563,7 +563,8 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
 
 #+begin_src emacs-lisp
 (setq my-packages
-      '(ack-and-a-half
+      '(assemblage-theme
+        ack-and-a-half
         ace-jump-mode
         ag
         auto-compile

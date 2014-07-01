@@ -664,6 +664,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         solarized-theme
         color-theme-sanityinc-solarized
         color-theme-sanityinc-tomorrow
+        qsimpleq-theme
         ))
 #+end_src
 
@@ -2148,10 +2149,17 @@ I like to see folding marks in fringe
 (autoload 'hideshowvis-minor-mode "hideshowvis" "Will indicate regions foldable with hideshow in the fringe." 'interactive)
 
 (add-hook 'prog-mode-hook 'hideshowvis-enable)
+
+;; Use arrows instead of +/-
+(hideshowvis-symbols)
+(define-fringe-bitmap 'hideshowvis-hideable-marker [0 0 254 124 56 16 0 0])
+(define-fringe-bitmap 'hs-marker [0 32 48 56 60 56 48 32])
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
 (require 'hideshow-org)
+(add-hook 'prog-mode-hook 'hs-org/minor-mode)
+
 #+end_src
 
 *** Clojure

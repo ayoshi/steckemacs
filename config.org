@@ -2195,7 +2195,7 @@ SLIME, the Superior Lisp Interaction Mode for Emacs, is an Emacs mode for develo
 (when (file-exists-p "~/quicklisp/slime-helper.el")
   (load (expand-file-name "~/quicklisp/slime-helper.el")))
 
-(setq inferior-lisp-program "ccl64")
+(setq inferior-lisp-program "sbcl")
 #+end_src
 
 *** TeX/LaTeX

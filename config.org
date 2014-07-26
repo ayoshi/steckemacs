@@ -1663,13 +1663,13 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
 (setq display-buffer-function 'popwin:display-buffer)
 
 (setq popwin:special-display-config
-      '(("*Help*"  :height 30)
+      '(("*Help*"  :height 50)
         ("*Completions*" :noselect t)
-        ("*Messages*" :noselect t :height 30)
-        ("*Apropos*" :noselect t :height 30)
+        ("*Messages*" :noselect t :height 50)
+        ("*Apropos*" :noselect t :height 50)
         ("*compilation*" :noselect t)
-        ("*Backtrace*" :height 30)
-        ("*Messages*" :height 30)
+        ("*Backtrace*" :height 50)
+        ("*Messages*" :height 50)
         ("*Occur*" :noselect t)
         ("*undo-tree*" :noselect t)
         ("*Ibuff\\*" :regexp t :noselect t :stick t)
@@ -1678,8 +1678,8 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
         ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
         ("*magit-diff*" :noselect t :height 40 :width 80)
         ("*magit-edit-log*" :noselect t :height 15 :width 80)
-        ("\\*ansi-term\\*.*" :regexp t :height 30)
-        ("*shell*" :height 30)
+        ("\\*ansi-term\\*.*" :regexp t :height 40)
+        ("*shell*" :height 40)
         (".*overtone.log" :regexp t :height 30)
         ("*gists*" :height 30)
         ("*sldb.*":regexp t :height 30)
@@ -2192,8 +2192,12 @@ SLIME, the Superior Lisp Interaction Mode for Emacs, is an Emacs mode for develo
 #+END_QUOTE
 
 #+begin_src emacs-lisp
-(when (file-exists-p "~/quicklisp/slime-helper.el") (load "~/quicklisp/slime-helper.el"))
+(when (file-exists-p "~/quicklisp/slime-helper.el")
+  (load (expand-file-name "~/quicklisp/slime-helper.el")))
+
+(setq inferior-lisp-program "ccl64")
 #+end_src
+
 *** TeX/LaTeX
 **** auctex-mode
 

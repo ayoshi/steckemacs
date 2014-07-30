@@ -568,6 +568,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         ace-jump-mode
         ag
         auto-compile
+        cl-lib
         evil
         surround
         ert-modeline
@@ -644,7 +645,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         popup
         popwin
         projectile
-        pretty-symbols
+        pretty-mode
         pos-tip
         rainbow-mode
         rainbow-delimiters
@@ -655,6 +656,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         smart-mode-line
         smartparens
         smex
+        slime-company
         visual-regexp
         vlf
         volatile-highlights
@@ -2195,8 +2197,37 @@ SLIME, the Superior Lisp Interaction Mode for Emacs, is an Emacs mode for develo
 (when (file-exists-p "~/quicklisp/slime-helper.el")
   (load (expand-file-name "~/quicklisp/slime-helper.el")))
 
+(when (file-exists-p "~/quicklisp/log4slime-setup.el")
+  (load "~/quicklisp/log4slime-setup.el")
+  (global-log4slime-mode 1))
+
 (setq inferior-lisp-program "sbcl")
+
+(require 'slime-autoloads)
+(slime-setup '(slime-repl slime-fancy slime-banner))
 #+end_src
+
+Popwin config for slime
+
+#+begin_src emacs-lisp :tangle yes
+;; Apropos
+(push '("*slime-apropos*") popwin:special-display-config)
+;; Macroexpand
+(push '("*slime-macroexpansion*") popwin:special-display-config)
+;; Help
+(push '("*slime-description*") popwin:special-display-config)
+;; Compilation
+(push '("*slime-compilation*" :noselect t) popwin:special-display-config)
+;; Cross-reference
+(push '("*slime-xref*") popwin:special-display-config)
+;; Debugger
+(push '(sldb-mode :stick t) popwin:special-display-config)
+;; REPL
+(push '(slime-repl-mode) popwin:special-display-config)
+;; Connections
+(push '(slime-connection-list-mode) popwin:special-display-config)
+#+end_src
+
 
 *** TeX/LaTeX
 **** auctex-mode

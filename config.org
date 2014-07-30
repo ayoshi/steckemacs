@@ -117,7 +117,10 @@ Set up special directories first
 (make-directory conf-custom-dir t)
 (make-directory conf-pscratch-dir t)
 
+;; Don't create lockfiles
+(setq create-lockfiles nil)
 #+end_src
+
 *** Default load path
 
 The variable =load-path= lists all the directories where Emacs should look for Elisp files. The first file found is used, therefore the order of the directories is relevant.
@@ -620,6 +623,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         helm-swoop
         highlight-symbol
         htmlize
+        hungry-delete
         iedit
         ido-vertical-mode
         ido-ubiquitous
@@ -1844,6 +1848,13 @@ Github: https://github.com/ShingoFukuyama/helm-swoop
 (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
 #+end_src
 
+**** hungry-delete
+
+#+begin_src emacs-lisp :tangle yes
+(require 'hungry-delete)
+(global-hungry-delete-mode)
+#+end_src
+
 **** move-text
 
 Allows to move the current line or region up/down
@@ -2227,7 +2238,6 @@ Popwin config for slime
 ;; Connections
 (push '(slime-connection-list-mode) popwin:special-display-config)
 #+end_src
-
 
 *** TeX/LaTeX
 **** auctex-mode

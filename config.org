@@ -515,6 +515,9 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         ;;(:name evil-extra-operator
         ;;       :type github
         ;;       :pkgname "Dewdrops/evil-extra-operator")
+        (:name hideshowvis
+               :type github
+               :pkgname "emacsmirror/hideshowvis")
         ;;(:name evil-exchange
         ;;       :type github
         ;;       :features evil-exchange
@@ -590,7 +593,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         creole-mode
         clojure-mode
         company
-        company-jedi
+        ;;company-jedi
         csv-mode
         dash
         dash-at-point
@@ -2152,10 +2155,12 @@ I like to see folding marks in fringe
 
 #+begin_src emacs-lisp :tangle yes
 
-(require 'hideshowvis)
-
 (eval-after-load "hideshowvis"
-  `(progn (load "hideshow-fringe" t)))
+  `(progn (load "hideshow-fringe" t)
+           (hideshowvis-symbols)
+    (define-fringe-bitmap 'hideshowvis-hideable-marker [0 0 254 124 56 16 0 0])
+  (define-fringe-bitmap 'hs-marker [0 32 48 56 60 56 48 32])
+))
 
 (autoload 'hideshowvis-enable "hideshowvis" "Highlight foldable regions")
 
@@ -2164,9 +2169,6 @@ I like to see folding marks in fringe
 (add-hook 'prog-mode-hook 'hideshowvis-enable)
 
 ;; Use arrows instead of +/-
-(hideshowvis-symbols)
-(define-fringe-bitmap 'hideshowvis-hideable-marker [0 0 254 124 56 16 0 0])
-(define-fringe-bitmap 'hs-marker [0 32 48 56 60 56 48 32])
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
@@ -2499,7 +2501,7 @@ Github: https://github.com/jorgenschaefer/elpy
     (setq elpy-rpc-python-command (concat shims-path "/python"))))
 
 (elpy-enable)
-(delq 'flymake-mode elpy-default-minor-modes)
+;; (delq 'flymake-mode elpy-default-minor-modes)
 
 (elpy-use-ipython)
 #+end_src

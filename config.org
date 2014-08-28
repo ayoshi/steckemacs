@@ -2174,6 +2174,8 @@ I like to see folding marks in fringe
 #+begin_src emacs-lisp :tangle yes
 (require 'hideshow-org)
 (add-hook 'prog-mode-hook 'hs-org/minor-mode)
+;; Tab is not the best character to toggle visibility
+(defvar hs-org/trigger-keys-block (list (kbd "C-TAB")))
 
 #+end_src
 
@@ -2478,7 +2480,7 @@ This is a minor mode that will run ERT tests in the background whenever you save
 #+end_src
 
 *** Python
-**** elpy
+**** COMMENT elpy
 
 Elpy makes setting up a great Python IDE a breeze. It's written by [[http://www.jorgenschaefer.de/][Jorgen Schäfer]] also known as =forcer=.
 
@@ -2489,7 +2491,7 @@ Github: https://github.com/jorgenschaefer/elpy
 (defvar pyenv-path "~/.pyenv"
   "pyenv root directory.")
 
-(setq elpy-rpc-backend "rope")
+(setq elpy-rpc-backend "jedi")
 
 (when (file-exists-p pyenv-path)
   (let ((bin-path (concat pyenv-path "/bin"))
@@ -2501,7 +2503,7 @@ Github: https://github.com/jorgenschaefer/elpy
     (setq elpy-rpc-python-command (concat shims-path "/python"))))
 
 (elpy-enable)
-;; (delq 'flymake-mode elpy-default-minor-modes)
+(delq 'elpy-module-flymake elpy-modules)
 
 (elpy-use-ipython)
 #+end_src

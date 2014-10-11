@@ -2127,10 +2127,10 @@ I like to see folding marks in fringe
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
-(require 'hideshow-org)
-(add-hook 'prog-mode-hook 'hs-org/minor-mode)
+;;(require 'hideshow-org)
+;;(add-hook 'prog-mode-hook 'hs-org/minor-mode)
 ;; Tab is not the best character to toggle visibility
-(defvar hs-org/trigger-keys-block (list (kbd "C-TAB")))
+;;(defvar hs-org/trigger-keys-block (list (kbd "C-TAB")))
 
 #+end_src
 

@@ -617,6 +617,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         smart-mode-line
         smartparens
         smex
+        smyx-theme
         slime-company
         visual-regexp
         vlf
@@ -2434,7 +2435,7 @@ This is a minor mode that will run ERT tests in the background whenever you save
 #+end_src
 
 *** Python
-**** COMMENT elpy
+****  elpy
 
 Elpy makes setting up a great Python IDE a breeze. It's written by [[http://www.jorgenschaefer.de/][Jorgen Schäfer]] also known as =forcer=.
 
@@ -2462,7 +2463,6 @@ Github: https://github.com/jorgenschaefer/elpy
 (elpy-use-ipython)
 #+end_src
 
-I'm using =flycheck= so please don't use =flymake= (which is old and bugly). Also RET should trigger completion for me and not a newline.
 *** Haskell
 **** haskell-mode
 

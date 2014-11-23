@@ -507,7 +507,7 @@ These are simple El-Get recipes that will either fetch single Elisp files or clo
 
 The sync function expects the package names which are extracted from =el-get-sources=. El-Get does the magic and gets the packages specified in =el-get-sources=.
 
-*** Packages
+*** COMMENT Packages
 
 #+begin_src emacs-lisp
    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
@@ -528,6 +528,8 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         ace-jump-mode
         ag
         auto-compile
+        ample-theme
+        ample-zen-theme
         cl-lib
         evil
         surround

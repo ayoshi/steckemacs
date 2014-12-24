@@ -459,9 +459,9 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         (:name eval-sexp-fu
                :type http
                :url "http://www.emacswiki.org/emacs/download/eval-sexp-fu.el")
-        (:name helm-google
-               :type git
-               :url "https://github.com/steckerhalter/helm-google")
+        ;;(:name helm-google
+        ;;       :type git
+        ;;       :url "https://github.com/steckerhalter/helm-google")
         (:name magit-filenotify
                :type git
                :url "https://github.com/magit/magit-filenotify")
@@ -487,10 +487,10 @@ This sets up the load path and fetches and evaluates the stable El-Get branch if
         ;;       :type github
         ;;       :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/emacs-soothe-theme")
         ;;       :pkgname "milkypostman/emacs-soothe-theme")
-        (:name replace-colorthemes
-               :type github
-               :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/replace-colorthemes")
-               :pkgname "emacs-jp/replace-colorthemes")
+        ;;(:name replace-colorthemes
+        ;;       :type github
+        ;;       :after (add-to-list 'custom-theme-load-path "~/.emacs.d/el-get/replace-colorthemes")
+        ;;       :pkgname "emacs-jp/replace-colorthemes")
         ))
 #+end_src
 
@@ -523,8 +523,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
 
 #+begin_src emacs-lisp
 (setq my-packages
-      '(assemblage-theme
-        ack-and-a-half
+      '( ack-and-a-half
         ace-jump-mode
         ag
         auto-compile
@@ -571,7 +570,7 @@ To get the latest org-mode I also add the repo from [[http://orgmode.org/][org-m
         grizzl
         haskell-mode
         hide-comnt
-        hideshowvis
+        ;;hideshowvis
         hideshow-org
         highlight
         helm
@@ -1624,41 +1623,6 @@ Smex is an IDO for command-list. I prefer IDO over Helm, for the simple reason t
 
 **** popwin
 
-#+begin_src emacs-lisp
-(require 'popwin)
-(setq display-buffer-function 'popwin:display-buffer)
-
-(setq popwin:special-display-config
-      '(("*Help*"  :height 50)
-        ("*Completions*" :noselect t)
-        ("*Messages*" :noselect t :height 50)
-        ("*Apropos*" :noselect t :height 50)
-        ("*compilation*" :noselect t)
-        ("*Backtrace*" :height 50)
-        ("*Messages*" :height 50)
-        ("*Occur*" :noselect t)
-        ("*undo-tree*" :noselect t)
-        ("*Ibuff\\*" :regexp t :noselect t :stick t)
-        ("*Org\\*" :regexp t :noselect t)
-        ("*Ido Completions*" :noselect t :height 30)
-        ("*magit-commit*" :noselect t :height 40 :width 80 :stick t)
-        ("*magit-diff*" :noselect t :height 40 :width 80)
-        ("*magit-edit-log*" :noselect t :height 15 :width 80)
-        ("\\*ansi-term\\*.*" :regexp t :height 40)
-        ("*shell*" :height 40)
-        (".*overtone.log" :regexp t :height 30)
-        ("*gists*" :height 30)
-        ("*sldb.*":regexp t :height 30)
-        ("*nrepl-error*" :height 30 :stick t)
-        ("*nrepl-doc*" :height 30 :stick t)
-        ("*nrepl-src*" :height 30 :stick t)
-        ("*nrepl-result*" :height 30 :stick t)
-        ("*nrepl-macroexpansion*" :height 30 :stick t)
-        ("*fixmee notices*" :height 30 :stick t)
-        ("*Kill Ring*" :height 30)
-        ("*Compile-Log*" :height 30 :stick t)
-        ("*git-gutter:diff*" :height 30 :stick t)))
-#+end_src
 **** magit
 
 Magit is the king of Git interaction for Emacs.
@@ -1787,7 +1751,7 @@ You might want to checkout the [[https://github.com/emacs-helm/helm/wiki][Helm W
 (setq helm-buffer-details-flag nil)
 (add-to-list 'helm-completing-read-handlers-alist '(org-refile)) ; helm-mode does not do org-refile well
 (add-to-list 'helm-completing-read-handlers-alist '(org-agenda-refile)) ; same goes for org-agenda-refile
-(require 'helm-git)
+;;(require 'helm-git)
 #+end_src
 
 I'm not using [[https://github.com/emacs-helm/helm/wiki#6-helm-find-files][Helm Find Files]] to browse files anymore. I tried using it but gave up after a while. I found it to be more cumbersome than [[*ido-mode][ido-mode]].
@@ -1894,7 +1858,7 @@ First mark the word, then add more cursors.
 I generally like rainbow-delimiters mode.
 
 #+begin_src emacs-lisp :tangle yes
-(global-rainbow-delimiters-mode)
+;;(global-rainbow-delimiters-mode)
 #+end_src
 
 *** Programming modes independent of languages
@@ -2183,21 +2147,13 @@ Popwin config for slime
 
 #+begin_src emacs-lisp :tangle yes
 ;; Apropos
-(push '("*slime-apropos*") popwin:special-display-config)
 ;; Macroexpand
-(push '("*slime-macroexpansion*") popwin:special-display-config)
 ;; Help
-(push '("*slime-description*") popwin:special-display-config)
 ;; Compilation
-(push '("*slime-compilation*" :noselect t) popwin:special-display-config)
 ;; Cross-reference
-(push '("*slime-xref*") popwin:special-display-config)
 ;; Debugger
-(push '(sldb-mode :stick t) popwin:special-display-config)
 ;; REPL
-(push '(slime-repl-mode) popwin:special-display-config)
 ;; Connections
-(push '(slime-connection-list-mode) popwin:special-display-config)
 #+end_src
 
 *** TeX/LaTeX
